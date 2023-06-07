@@ -9,6 +9,7 @@ X = np.sin(t)
 
 dev = qml.device('default.qubit', wires=3)
 
+@qml.qnode(dev)
 def circuit(x,y,weights): # y is going to be X(i+1) while x is X(i)
     qml.AngleEmbedding(features = x, wires = [1])  # creating psi(x)
     qml.RZ(weights[0], wires=[1])
@@ -18,7 +19,7 @@ def circuit(x,y,weights): # y is going to be X(i+1) while x is X(i)
     qml.Hadamard(wires=[0])  # performing the cswap test- i.e. measuring the difference between wire 1 and 2
     qml.CSWAP([0, 1, 2])
     qml.Hadamard(wires=[0])
-    return qml.expval(qml.PauliZ)  # This is going to return either a 1 (states are different) or a 0 (states are the same)
+    return qml.expval(qml.PauliZ(0))  # This is going to return either a 1 (states are different) or a 0 (states are the same)
 
 weights = np.random.uniform(0,pi,3)
 
