@@ -6,7 +6,8 @@ from tqdm import tqdm
 from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
-from matplotlib import pyplot as plt 
+from matplotlib import pyplot as plt
+print("finished imports")
 
 apple = pd.read_csv("AAPL max.csv", usecols=["Close", "Date"])
 
