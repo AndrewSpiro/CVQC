@@ -7,15 +7,14 @@ from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 from matplotlib import pyplot as plt
-print("finished imports")
 
 apple = pd.read_csv("AAPL max.csv", usecols=["Close", "Date"])
 
 apl = pd.read_csv("AAPL max.csv", usecols = ["Close"])
 apl = pd.DataFrame.to_numpy(apl)
 np.concatenate(apl)
-#sample_size = 10080  # Limiting dataset to what was used in the paper.
-sample_size = 201
+sample_size = 10080  # Limiting dataset to what was used in the paper.
+#sample_size = 201
 aapl = apl[:sample_size]  # A small sample
 print(apl)
 plt.plot(aapl)
@@ -26,7 +25,7 @@ for i in range(N-1):
   pc[i] = (aapl[i+1]-aapl[i])/aapl[i]
 # %%
 plt.scatter(np.linspace(0,N,N),pc,marker ='.')
-plt.ylim(-0.6,0.6)
+#plt.ylim(-0.6,0.6)
 plt.show
 
 # %%
@@ -39,8 +38,9 @@ for k in tqdm(range(N//2)):
         sum += (pc[i] * np.exp(2 * np.pi * i * k * 1j * 1/N))
     P[k] = np.abs(sum)**2
     nu[k] = k/N
-    
-threshold = 1
+ 
+#threshold = 1    
+threshold = 50
 plt.loglog(nu, P)
 # %%
 amp2 = []
@@ -79,7 +79,7 @@ r = num_components
 #r = 16  # Following the paper
 N_QUBITS = (r + 1)
 print(N_QUBITS)
-n_layers = 5
+n_layers = 2
 
 dev = qml.device('default.qubit', wires= N_QUBITS)
 
@@ -148,9 +148,9 @@ for i in range(test_size//N_QUBITS):
   x_t[i] = final_test[i][:-1]
   target_y_t[i] = final_test[i][-1]
   
-max_steps = 10
+max_steps = 100 # increase for larger sample sizes
 optimizer = [qml.AdamOptimizer(.1), qml.AdagradOptimizer(.1)]
-opt = optimizer[1]
+opt = optimizer[0]
 batch_size = train_size//max_steps
 cst = [cost(weights, x, target_y)]  # initial cost
 cst_t = [cost(weights, x_t, target_y_t)]
@@ -170,16 +170,20 @@ for i in range(epochs):
   cst.append(c)
   cst_t.append(c_t)
 # %%
-
-plt.semilogy(range(len(cst)), cst, 'b')
-plt.semilogy(cst_t, 'r')
+plt.figure()
+plt.semilogy(range(len(cst)), cst, 'b', label = 'Train')
+plt.semilogy(cst_t, 'r', label = 'Test')
+plt.title("Loss")
 plt.ylabel("Cost")
 plt.xlabel("Step")
+plt.legend()
+plt.savefig('kernel_loss.png')
 plt.show()
-print(cst[0], (cst[-1]))
+print("Final loss:" + str(cst[-1]))
 # %%
 y_index = []
-for i in range(int(N*2/3)+N_QUBITS,N,N_QUBITS):
+# for i in range(int(N*2/3)+N_QUBITS,N,N_QUBITS):
+for i in range(int(N*2/3)+r,N,N_QUBITS):
     y_index.append(i)
 y_index = np.array(y_index)
 y_index.reshape(test_size//N_QUBITS,1)
@@ -189,17 +193,46 @@ for i in range(test_size//N_QUBITS):
   t_predictions[i] = (PQC(weights, x_t[i]))
 t_predictions = t_predictions.reshape((test_size//N_QUBITS, 1))
 
-metrics.mean_squared_error(t_predictions,target_y_t)
+transformed_mse = metrics.mean_squared_error(t_predictions,target_y_t)
+np.save('Transformed MSE', transformed_mse)
 # %%
 real_predictions = scaler.inverse_transform(t_predictions)
 real_target = scaler.inverse_transform(target_y_t)
 
-plt.axline((1.5, 1.5), slope=1,color = '0',linestyle = '--')
-plt.plot(real_target[:-1], real_predictions[1:])
-plt.plot(real_target[:-1], real_target[1:])
+def forward(x):
+  data = x[:-1]
+  predictions = x[1:]
+  forward_mse = metrics.mean_squared_error(predictions,data)
+  return forward_mse, data, predictions
+
+forward_mse,_,_ = forward(real_target)
+
+#forward_mse = forward(real_target)
+
+# Commenting this out because it's buggy and we haven't been using the forward plots
+# # plt.title("forward")
+# plt.title("overwrite test")
+# plt.xlabel('x')
+# plt.ylabel('x+1')
+# plt.plot(real_target[:-1], real_predictions[1:])
+# plt.plot(real_target[:-1], real_target[1:])
+# plt.axline((1.5, 1.5), slope=1, color = '0', linestyle = '--')
+# plt.savefig('kernel_forward.png')
 
 # %%
-plt.plot(full_signal)
-plt.scatter(y_index,real_predictions)
-print('MSE: ' + str(metrics.mean_squared_error(real_predictions,full_signal[y_index])))
+mse = metrics.mean_squared_error(real_predictions,real_target)
+np.save('mse.npy', mse)
+
+plt.figure()
+plt.plot(full_signal, label = "Original Signal")
+plt.scatter(y_index,real_predictions, label = "Predictions")
+plt.scatter(y_index,real_target, label = "Targets")
+plt.xlabel("Day")
+plt.ylabel("Percent of change")
+plt.title("Predictions")
+plt.legend()
+plt.figtext(x=0, y = 0, s = 'MSE=' + str(mse) + ', Forward=' + str(forward_mse))
+plt.savefig('predictions.png')
+
+print('MSE: ' + str(mse))
 # %%
