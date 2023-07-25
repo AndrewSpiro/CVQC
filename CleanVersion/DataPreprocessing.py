@@ -1,5 +1,5 @@
 # %%
-from DataProcessing import *
+from CleanVersion.DataPreprocessingFuncs import *
 # %%
 dataset = load_data('AAPL max.csv',usecols=['Close'], sample_size=201, bool_plot=True)
 percent_of_change = gradient(dataset, bool_plot=True)
