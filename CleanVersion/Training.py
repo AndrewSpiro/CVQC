@@ -1,7 +1,7 @@
 # %%
 from Circuits.Ising import choose_n_qubits, initialize_Ising_circuit
 from DataPreprocessing import full_signal, r
-from CleanVersion.Functions.TrainingFuncs import *
+from Functions.TrainingFuncs import *
 
 n_qubits = choose_n_qubits()
 
