@@ -6,7 +6,23 @@ from tqdm import tqdm
 from DataPreprocessing import r
 
 
-def split_train_test(data, n_qubits, train_ratio = 2/3, random = False, seed = 0):
+def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, seed = 0):
+    '''
+    Splits data into two sub-datsets: one for training and one for testing. 
+    
+            Parameters:
+                    data: 1-D data to be split
+                    n_qubits (int): number of qubits in the PQC
+                    train_ratio: fraction of full data to be used for training. Must be less than 1.
+                    random (bool): if False (default), the data is split chronologically e.g., the first 2/3 of the data are used for training and the last 1/3 are used for testing. If True, the data is split randomly.
+                    seed (Any): seed for np.random
+            Returns:
+                    train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size//n_qubits, n_qubits)
+                    test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size//n_qubits, n_qubits)
+                    train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized "groups" in train)
+                    test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized "groups" in test)
+
+    '''
     
     grouped_data = np.zeros((len(data)-n_qubits+1, n_qubits))
     for i in range(len(data)-n_qubits+1):
@@ -27,6 +43,21 @@ def split_train_test(data, n_qubits, train_ratio = 2/3, random = False, seed = 0
     return train, test, train_size, test_size
     
 def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, scaler_max = 0.8):
+    '''
+    Scales the data for embedding in the PQC. By default, scales all values to be between 0.2 and 0.8.
+    
+            Parameters:
+                    train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size//n_qubits, n_qubits)
+                    test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size//n_qubits, n_qubits)
+                    train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized "groups" in train)
+                    test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized "groups" in test)
+                    n_qubits: number of qubits in the PQC
+                    scaler_min = the target minimum value for all values in the full dataset
+                    scaler_max = the target maximum value for all values in the full dataset
+            Returns:
+                    final_train (numpy.ndarray): 2-D array containing the scaled training data. The shape of the data is (train_size//n_qubits, n_qubits)
+                    final_test (numpy.ndarray): 2-D array containing the scaled testing data. The shape of the data is (test_size//n_qubits, n_qubits)                    
+    '''    
     scaler = MinMaxScaler((scaler_min,scaler_max))
     train_1d = train.reshape(train_size*n_qubits,1)
     test_1d = test.reshape(test_size*n_qubits,1)
@@ -43,6 +74,15 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
     return final_train, final_test
 
 def input_target_split(data):
+    '''
+    For a 2-D array, moves along axis = 0 and splits each array of size N into an "input" array of size N-1 and a "target" array of size N.
+    
+            Parameters:
+                    data (numpy.ndarray): The 2-D array to be split
+            Returns:
+                    x (numpy.ndarray): A 2-D "input" array. x[i] is a 1-D array containing data[i][:-1]
+                    target_y (numpy.ndarray): A 2-D "target" array. target_y[i]  is a 1-D array of containing data[i][-1]
+    '''
     data_size = len(data)
     x = np.zeros((data_size, r))
     target_y = np.zeros((data_size,1))
@@ -52,7 +92,26 @@ def input_target_split(data):
     return x, target_y
 
 def train_model(train, test, weights, circuit, max_steps, epochs, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
+    '''
+    Trains the PQC using the "train" dataset and according to the specified hyperparameters. 
     
+            Parameters:
+                    train (numpy.ndarray): 2-D array containing the scaled training data. Used to train the model and update weights.
+                    test (numpy.ndarray): 2-D array containing the scaled testing data. Used to check progress of training.
+                    weights: parameters of the PQC updated by the optimizer to change output.
+                    circuit: The circuit which encodes the training data and, according to its parameters, returns an output to be compared with "target" data
+                    max_steps (int): The number of times the weights should be updated before the entire dataset has been evaluated. 
+                    max_epochs (int): The maximum number of times the full dataset should be evaluated.
+                    loss_function: the function to evaluate the performance of the model i.e., the function to be minimized
+                    optimizer: The algorithm that adjusts the weights in the circuit.
+                    learning_rate: the learning rate of the optimizer.
+                    bool_plot (bool): If True, will plot the loss as a function of epochs once training is completed
+                    save_plot (str): If None, the plot will not be saved, otherwise it will be saved as the string entered
+            Returns:
+                    weights: the most-recently updated weights that were obtained when training is complete
+                    x_t: input values for testing
+                    target_y_t: target values for training
+    '''
     valid_loss_functions = ["square_loss"]
     if loss_function not in valid_loss_functions:
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
@@ -115,8 +174,24 @@ def train_model(train, test, weights, circuit, max_steps, epochs, loss_function 
     return(weights, x_t, target_y_t)
 
 def save_weights(weights, filename: str = "weights- rename asap"):
+    '''
+    Saves final weights from training
+    
+            Parameters:
+                    weights: the weights to be saved
+                    filename: the name of the file to which the weights are saved. If not specified, the weights will be saved by default to "weights- rename asap"
+    '''
     np.save(filename, weights)
 
 def save_test_data(x_t, y_targets_t, input_filename: str = "test inputs- rename asap", target_filename: str = "test targets- rename asap"):
+    '''
+    Saves final test inputs and test targets from training
+    
+            Parameters:
+                    x_t: the test inputs to be saved
+                    y_targets_t: the test targets to be saved
+                    input_filename: the name of the file to which the test inputs are saved. If not specified, the inputs will be saved by default to "test inputs- rename asap"
+                    target_filename: the name of the file to which the test targets are saved. If not specified, the targets will be saved by default to "test targets- rename asap"
+    '''
     np.save(input_filename, x_t)
     np.save(target_filename, y_targets_t)
