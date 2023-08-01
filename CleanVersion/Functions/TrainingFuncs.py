@@ -21,7 +21,8 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
                     test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size//n_qubits, n_qubits)
                     train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized "groups" in train)
                     test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized "groups" in test)
-
+                    train_ratio: fraction of full data to be used for training. Must be less than 1.
+                    shuffle_indices: gives the index of each "group" in the original data. If random is False, shuffle_indices is just the range of integers from 0 to the number of groups.
     '''
     
     grouped_data = np.zeros((len(data)-n_qubits+1, n_qubits))
@@ -29,10 +30,12 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
         grouped_data[i] = (np.array(data[i:i+n_qubits])).squeeze()
 
     
-    shuffle_indices = np.arange(0,len(grouped_data))   
+    data_indices = np.arange(0,len(grouped_data))   
     if random == True:
         np.random.seed(seed)
-        np.random.shuffle(shuffle_indices)
+        shuffle_indices = np.random.shuffle(data_indices)
+    else:
+        shuffle_indices = data_indices
     shuffled_grouped_data = grouped_data[shuffle_indices]
     
     train = shuffled_grouped_data[:int(train_ratio*(len(shuffled_grouped_data)))]
@@ -40,7 +43,7 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
     train_size = len(train)
     test_size = len(test)
     
-    return train, test, train_size, test_size
+    return train, test, train_size, test_size, train_ratio, shuffle_indices
     
 def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, scaler_max = 0.8):
     '''
@@ -56,13 +59,14 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
                     scaler_max = the target maximum value for all values in the full dataset
             Returns:
                     final_train (numpy.ndarray): 2-D array containing the scaled training data. The shape of the data is (train_size//n_qubits, n_qubits)
-                    final_test (numpy.ndarray): 2-D array containing the scaled testing data. The shape of the data is (test_size//n_qubits, n_qubits)                    
+                    final_test (numpy.ndarray): 2-D array containing the scaled testing data. The shape of the data is (test_size//n_qubits, n_qubits)
+                    scaler: The initialized and fitted scaler                    
     '''    
-    scaler = MinMaxScaler((scaler_min,scaler_max))
+    init_scaler = MinMaxScaler((scaler_min,scaler_max))
     train_1d = train.reshape(train_size*n_qubits,1)
     test_1d = test.reshape(test_size*n_qubits,1)
     train_test_1d = np.concatenate((train_1d, test_1d))
-    scaler.fit(train_test_1d)
+    scaler = init_scaler.fit(train_test_1d)
     scaled_train_1d = scaler.transform(train_1d)
     scaled_test_1d = scaler.transform(test_1d)
     scaled_train = scaled_train_1d.reshape(train_size,n_qubits)
@@ -71,7 +75,7 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
     final_train = scaled_train
     final_test = scaled_test
     
-    return final_train, final_test
+    return final_train, final_test, scaler
 
 def input_target_split(data):
     '''
