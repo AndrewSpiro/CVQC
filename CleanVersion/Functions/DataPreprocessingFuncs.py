@@ -16,9 +16,7 @@ def load_data(dataset, usecols = all, skiprows = None, sample_size = all, bool_p
                     bool_plot (boolean): If True, will plot the data
             Returns: 
                     dataset (np.array): a 1-D array
-
     '''
-
     data_frame = pd.read_csv(dataset, usecols=usecols)
     data = pd.DataFrame.to_numpy(data_frame)
     np.concatenate(data)
@@ -51,7 +49,8 @@ def gradient(data, bool_plot = False):
         plt.show()
     return pc
 
-def FT_mod_squared(signal, threshold: int, bool_plot: bool = False, save_components: str = None):
+
+def find_components(load_PSD = None, signal= None, threshold: int = None, bool_plot: bool = False, save_components: str = None):
     '''
     Performs a discrete Fourier transform and calculates the modulus squared to estimate the signal's power spectral density.
     
@@ -64,35 +63,47 @@ def FT_mod_squared(signal, threshold: int, bool_plot: bool = False, save_compone
                     DC (1-D np.array): Array containing the frequencies of the component signals with amplitudes above the threshold (the deterministic components).
                     amp (1-D np.array): Array containing the amplitudes of the deterministic components. (DC[i] and amp[i] give the frequency and amplitude respectively of a deterministic component signal.)
                     N = length of the original signal.
-
     '''
     
-    N = len(signal)
-    P = np.zeros((N//2,1))
-    nu = np.zeros((N//2,1))
-    for k in tqdm(range(N//2)):
-        sum = 0
-        for i in range(N):
-            sum += (signal[i] * np.exp(2 * np.pi * i * k * 1j * 1/N))
-        P[k] = np.abs(sum)**2
-        nu[k] = k/N
+    if load_PSD != None:
+        PSD = np.load(load_PSD, allow_pickle = True)
+        DC = PSD[0] 
+        amp = PSD[1]
+        N = PSD[2]
         
-    if bool_plot == True:
-        plt.figure()
-        print('Periodogram:')
-        plt.loglog(nu, P)
-        plt.show()
+    else:
+        if type(signal) == type(None):
+            raise ValueError("'signal' is None: If no file is loaded, a signal and threshold must be given")
+        if threshold == None:
+            raise ValueError("'threshold' is None: If no file is loaded, a signal and threshold must be specified")
+        else: 
+            N = len(signal)
+            P = np.zeros((N//2,1))
+            nu = np.zeros((N//2,1))
+            for k in tqdm(range(N//2)):
+                sum = 0
+                for i in range(N):
+                    sum += (signal[i] * np.exp(2 * np.pi * i * k * 1j * 1/N))
+                P[k] = np.abs(sum)**2
+                nu[k] = k/N
+                
+            if bool_plot == True:
+                plt.figure()
+                print('Periodogram:')
+                plt.loglog(nu, P)
+                plt.show()
 
-    amp2 = []
-    DC = []
-    for i in range(N//2):
-        if P[i] > threshold:
-            amp2.append(P[i])
-            DC.append(nu[i])
-    amp = np.sqrt(amp2)
-    if save_components != None:
-        np.save(save_components, np.array([DC,amp]))
+            amp2 = []
+            DC = []
+            for i in range(N//2):
+                if P[i] > threshold:
+                    amp2.append(P[i])
+                    DC.append(nu[i])
+            amp = np.sqrt(amp2)
+            if save_components != None:
+                np.save(save_components, np.array([DC,amp,N]))
     return(DC, amp, N)
+
 
 def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2], N, bool_plot = False):
     '''
