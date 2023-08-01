@@ -2,10 +2,7 @@ import pennylane as qml
 from pennylane import numpy as np
 from DataPreprocessing import r
 
-def choose_n_qubits(n_qubits: int = r +1):
-    return n_qubits
-
-def initialize_Ising_circuit(n_qubits, n_layers: int = 2, seed = 0, bool_test = False, bool_draw = False):
+def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, bool_test = False, bool_draw = False):
     '''
     Creates a circuit with Ising architecture (Emmanoulopuolos and Dimoska) with a specific number of qubits and layers. Also initializes encodings and weights.
     
@@ -17,6 +14,9 @@ def initialize_Ising_circuit(n_qubits, n_layers: int = 2, seed = 0, bool_test = 
                     bool_draw (bool): If True, a drawing of the circuit will be printed
             Returns:
                     PQC (func): The circuit with initialized weights and inputs. It is a function which takes weights of size= (n_layers, 3, n_qubits - 1) and inputs of size = (n_qubits-1).
+                    weights: parameters of the PQC to be updated by a optimizer to change output.
+                    n_qubits (int): Number of qubits in the circuit.
+
     '''
     np.random.seed(seed)
     dev = qml.device('lightning.qubit', wires= n_qubits)
@@ -53,4 +53,4 @@ def initialize_Ising_circuit(n_qubits, n_layers: int = 2, seed = 0, bool_test = 
     if bool_draw == True:
         print(qml.draw(PQC,expansion_strategy ="device")(weights,x))
             
-    return PQC, weights
+    return PQC, weights, n_qubits
