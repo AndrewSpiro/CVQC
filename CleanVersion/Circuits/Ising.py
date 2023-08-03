@@ -43,10 +43,10 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
                 Returns:
                         qml.expval(qml.PauliZ(wire = 0)): Expectation value after applying the Pauli Z operator.
                 '''
-        qml.AngleEmbedding(x,wires=range(n_qubits)[1:])   # Features x are embedded in rotation angles
+        qml.AngleEmbedding(x,wires=range(n_qubits)[:-1])   # Features x are embedded in rotation angles
         for j in range(n_layers):
             block(weights[j])
-        return qml.expval(qml.PauliZ(wires=0))
+        return qml.expval(qml.PauliZ(wires=n_qubits-1))
     
     if bool_test == True:
         print(PQC(weights, x))
