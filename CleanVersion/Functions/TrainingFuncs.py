@@ -3,7 +3,8 @@ from pennylane import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from DataPreprocessing import r
+import joblib
+import pickle
 
 
 def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, seed = 0):
@@ -22,7 +23,7 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
                     train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized "groups" in train)
                     test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized "groups" in test)
                     train_ratio: fraction of full data to be used for training. Must be less than 1.
-                    shuffle_indices: gives the index of each "group" in the original data. If random is False, shuffle_indices is just the range of integers from 0 to the number of groups.
+                    indices: gives the index of each "group" in the original data. If random is False, indices is just the range of integers from 0 to the number of groups.
     '''
     
     grouped_data = np.zeros((len(data)-n_qubits+1, n_qubits))
@@ -30,20 +31,18 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
         grouped_data[i] = (np.array(data[i:i+n_qubits])).squeeze()
 
     
-    data_indices = np.arange(0,len(grouped_data))   
+    indices = np.arange(0,len(grouped_data))   
     if random == True:
         np.random.seed(seed)
-        shuffle_indices = np.random.shuffle(data_indices)
-    else:
-        shuffle_indices = data_indices
-    shuffled_grouped_data = grouped_data[shuffle_indices]
+        np.random.shuffle(indices)
+    shuffled_grouped_data = grouped_data[indices]
     
     train = shuffled_grouped_data[:int(train_ratio*(len(shuffled_grouped_data)))]
     test = shuffled_grouped_data[int(train_ratio*(len(shuffled_grouped_data))):]
     train_size = len(train)
     test_size = len(test)
     
-    return train, test, train_size, test_size, train_ratio, shuffle_indices
+    return train, test, train_size, test_size, train_ratio, indices
     
 def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, scaler_max = 0.8):
     '''
@@ -77,25 +76,7 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
     
     return final_train, final_test, scaler
 
-def input_target_split(data):
-    '''
-    For a 2-D array, moves along axis = 0 and splits each array of size N into an "input" array of size N-1 and a "target" array of size N.
-    
-            Parameters:
-                    data (numpy.ndarray): The 2-D array to be split
-            Returns:
-                    x (numpy.ndarray): A 2-D "input" array. x[i] is a 1-D array containing data[i][:-1]
-                    target_y (numpy.ndarray): A 2-D "target" array. target_y[i]  is a 1-D array of containing data[i][-1]
-    '''
-    data_size = len(data)
-    x = np.zeros((data_size, r))
-    target_y = np.zeros((data_size,1))
-    for i in range(data_size):
-        x[i] = data[i][:-1]
-        target_y[i] = data[i][-1]
-    return x, target_y
-
-def train_model(train, test, weights, circuit, max_steps, epochs, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
+def train_model(train, test, weights, circuit, n_qubits, max_steps, epochs, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
     '''
     Trains the PQC using the "train" dataset and according to the specified hyperparameters. 
     
@@ -116,6 +97,25 @@ def train_model(train, test, weights, circuit, max_steps, epochs, loss_function 
                     x_t: input values for testing
                     target_y_t: target values for training
     '''
+    
+    def input_target_split(data):
+        '''
+        For a 2-D array, moves along axis = 0 and splits each array of size N into an "input" array of size N-1 and a "target" array of size N.
+        
+                Parameters:
+                        data (numpy.ndarray): The 2-D array to be split
+                Returns:
+                        x (numpy.ndarray): A 2-D "input" array. x[i] is a 1-D array containing data[i][:-1]
+                        target_y (numpy.ndarray): A 2-D "target" array. target_y[i]  is a 1-D array of containing data[i][-1]
+        '''
+        data_size = len(data)
+        x = np.zeros((data_size, n_qubits - 1))
+        target_y = np.zeros((data_size,1))
+        for i in range(data_size):
+            x[i] = data[i][:-1]
+            target_y[i] = data[i][-1]
+        return x, target_y
+    
     valid_loss_functions = ["square_loss"]
     if loss_function not in valid_loss_functions:
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
@@ -177,25 +177,13 @@ def train_model(train, test, weights, circuit, max_steps, epochs, loss_function 
     
     return(weights, x_t, target_y_t)
 
-def save_weights(weights, filename: str = "weights- rename asap"):
-    '''
-    Saves final weights from training
-    
-            Parameters:
-                    weights: the weights to be saved
-                    filename: the name of the file to which the weights are saved. If not specified, the weights will be saved by default to "weights- rename asap"
-    '''
-    np.save(filename, weights)
-
-def save_test_data(x_t, y_targets_t, input_filename: str = "test inputs- rename asap", target_filename: str = "test targets- rename asap"):
-    '''
-    Saves final test inputs and test targets from training
-    
-            Parameters:
-                    x_t: the test inputs to be saved
-                    y_targets_t: the test targets to be saved
-                    input_filename: the name of the file to which the test inputs are saved. If not specified, the inputs will be saved by default to "test inputs- rename asap"
-                    target_filename: the name of the file to which the test targets are saved. If not specified, the targets will be saved by default to "test targets- rename asap"
-    '''
-    np.save(input_filename, x_t)
-    np.save(target_filename, y_targets_t)
+def save_results_params(results_and_params, dict_path):
+    with open(dict_path, 'wb') as fp:
+        pickle.dump(results_and_params, fp)
+        
+def save_circuit(circuit, circuit_path):
+    t = circuit.qtape.to_openqasm()
+    t_cut = t[:-23]
+    t_file = open(circuit_path, 'w')
+    t_file.write(t_cut)
+    t_file.close()

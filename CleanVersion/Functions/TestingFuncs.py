@@ -1,11 +1,13 @@
 import numpy as np
-from sklearn import metrics
+from sklearn.metrics import mean_squared_error as MSE
 from matplotlib import pyplot as plt
-from DataPreprocessing import N
-from Training import *
+from DataPreprocessing import full_signal
+import pickle
+import pennylane as qml
 
 
-def make_predictions(weights, inputs):
+
+def make_predictions(circuit,weights, inputs):
     '''
     Uses test data and weights obtained from training to make predictions.
     
@@ -15,6 +17,7 @@ def make_predictions(weights, inputs):
             Returns:
                     predictions: An array of predicted values, each evaluated by a PQC using weights and some input data. Each value is an expectation value from the PQC and is therefore scale from -1 to 1.
     '''
+    test_size = len(inputs)
     predictions = np.zeros((test_size,1))
     for i in range(test_size):
         predictions[i] = (circuit(weights, inputs[i]))
@@ -35,13 +38,13 @@ def calc_MSE(scaled_inputs, scaled_predictions, scaled_targets, bool_scaled):
 
     '''
     if bool_scaled == True:
-        mse = mse(scaled_predictions, scaled_targets)
+        mse = MSE(scaled_predictions, scaled_targets)
         forward_mse = forward(scaled_inputs, scaled_targets)        
     else:
         inputs = inverse_transform(scaled_inputs)
         predictions = inverse_transform(scaled_predictions)
         targets = inverse_transform(scaled_targets)
-        mse = mse(predictions, targets)
+        mse = MSE(predictions, targets)
         forward_mse = forward(inputs, targets)
     return mse, forward_mse
 
@@ -59,12 +62,12 @@ def forward(inputs, targets):
     predictions = np.zeros(test_size)
     for i in range(test_size):
         predictions[i] = inputs[i][-1]
-    forward_mse = metrics.mean_squared_error(predictions,targets)
+    forward_mse = MSE(predictions,targets)
     print(predictions)
     return forward_mse
 
 
-def inverse_transform(scaled_data):
+def inverse_transform(scaled_data, scaler):
     '''
     Performs and inverse transform on predictions and targets to return the data to their original values before scaling with MinMaxScaler
 
@@ -76,7 +79,7 @@ def inverse_transform(scaled_data):
     data = scaler.inverse_transform(scaled_data)
     return data
     
-def test(inputs, weights, save_mse: str = None, bool_scaled = False):
+def test(circuit, scaled_inputs, scaled_targets, scaler, weights, save_mse: str = None, bool_scaled = False):
     '''
             Parameters:
                     inputs: Test data
@@ -87,42 +90,27 @@ def test(inputs, weights, save_mse: str = None, bool_scaled = False):
                     save_mse (str): If None, the mse will not be saved, otherwise, the forward mse will be saved to the path given as the string.
                     bool_scaled: If True, the mse is calculated using the scaled values. If False, the mse is calculated using the original (unscaled) values.
     '''
-    scaled_predictions = make_predictions(weights, inputs)
-    mse, forward_mse = calc_MSE(scaled_predictions, target_y_t, bool_scaled)
+    scaled_predictions = make_predictions(circuit=circuit, weights=weights, inputs=scaled_inputs)
+    mse, forward_mse = calc_MSE(scaled_inputs, scaled_predictions, scaled_targets, bool_scaled = bool_scaled)
     if bool_scaled == True:
-        predictions = inverse_transform(scaled_predictions)
-        targets = inverse_transform(target_y_t)
+        predictions = inverse_transform(scaled_predictions, scaler)
+        targets = inverse_transform(scaled_targets, scaler)
     return predictions, targets, mse, forward_mse
         
 
-def plot(predictions, targets, mse = None, forward_mse = None, plot_labels = ['x-axis','y-axis'], bool_plot: bool = False, save_plot: str = None):
-        
-    def unshuffle_predictions(targets, indices, train_size):
-        sorted_predictions = np.zeros(N)
-        for i in range(train_size,len(indices)):
-            final_pos = indices[i] + r
-            sorted_predictions[final_pos] = targets[i-train_size]
-                
-        pred_index = []
-        pred = []
-        for i in range(N):
-            if sorted_predictions[i] ==0:
-                continue
-            pred_index.append([i])
-            pred.append([sorted_predictions[i]])
-        return pred_index, pred    
-
-    pred_index, pred = unshuffle_predictions
+def plot(predictions, targets, indices, n_qubits, bool_plot: bool = False, save_plot: str = None, mse = None, forward_mse = None, plot_labels = ['x-axis','y-axis']):
 
     if bool_plot == True or save_plot != None:
         if type(plot_labels) != list:
             raise ValueError("Invalid type! input must be a list of the form ['x label','y labe].")
         if len(plot_labels) != 2:
             raise ValueError("Invalid length! input must be a list of the form ['x label','y labe].")
+        target_indices = indices[-len(targets):] + n_qubits - 1
+        
         plt.figure()
         plt.plot(full_signal, label = "Signal")
-        plt.scatter(pred_index, predictions, label = "Predictions")
-        plt.scatter(pred_index, targets, label = "Targets")
+        plt.scatter(target_indices, predictions, label = "Predictions")
+        plt.scatter(target_indices, targets, label = "Targets")
         plt.xlabel(plot_labels[0])
         plt.ylabel(plot_labels[1])
         plt.title("Predictions")
@@ -134,3 +122,15 @@ def plot(predictions, targets, mse = None, forward_mse = None, plot_labels = ['x
         if bool_plot == True:
             plt.show
     return
+
+def load_results_params(dict_path):
+    with open(dict_path, 'rb') as fp:
+        results_params = pickle.load(fp)
+    return results_params
+
+def load_circuit(circuit_path: str):
+    circuit_file = open(circuit_path, 'r')
+    circuit_string = circuit_file.read()
+    circuit_file.close()
+    circuit = qml.from_qasm(circuit_string)
+    return circuit
