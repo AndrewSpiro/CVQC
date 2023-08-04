@@ -76,7 +76,7 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
     
     return final_train, final_test, scaler
 
-def train_model(train, test, weights, circuit, n_qubits, max_steps, epochs, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
+def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, epochs: int, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
     '''
     Trains the PQC using the "train" dataset and according to the specified hyperparameters. 
     
@@ -84,7 +84,8 @@ def train_model(train, test, weights, circuit, n_qubits, max_steps, epochs, loss
                     train (numpy.ndarray): 2-D array containing the scaled training data. Used to train the model and update weights.
                     test (numpy.ndarray): 2-D array containing the scaled testing data. Used to check progress of training.
                     weights: parameters of the PQC updated by the optimizer to change output.
-                    circuit: The circuit which encodes the training data and, according to its parameters, returns an output to be compared with "target" data
+                    circuit (pennylane.qnode.QNode): The circuit which encodes the training data and, according to its parameters, returns an output to be compared with "target" data
+                    n_qubits (int): The number of qubits in the quantum circuit
                     max_steps (int): The number of times the weights should be updated before the entire dataset has been evaluated. 
                     max_epochs (int): The maximum number of times the full dataset should be evaluated.
                     loss_function: the function to evaluate the performance of the model i.e., the function to be minimized
@@ -170,7 +171,7 @@ def train_model(train, test, weights, circuit, n_qubits, max_steps, epochs, loss
         plt.title("Loss")
         plt.legend()
         plt.figtext(x=0, y = 0, s = "initial train cost" + str(cst[0]) + "; final train cost:" + str(cst[-1]))
-        if save_plot == True:
+        if save_plot != None:
             plt.savefig(save_plot)
         if bool_plot == True:
             plt.show()
