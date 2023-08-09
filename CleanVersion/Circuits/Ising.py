@@ -1,8 +1,10 @@
 import pennylane as qml
-from pennylane import numpy as np
 from DataPreprocessing import r
+import jax
+import jax.numpy as jnp
+from pennylane import numpy as np
 
-def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, bool_test = False, bool_draw = False):
+def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, key = jax.random.PRNGKey(0), bool_test = False, bool_draw = False):
     '''
     Creates a circuit with Ising architecture (Emmanoulopuolos and Dimoska) with a specific number of qubits and layers. Also initializes encodings and weights.
     
@@ -18,11 +20,12 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
                     n_qubits (int): Number of qubits in the circuit.
 
     '''
-    np.random.seed(seed)
-    dev = qml.device('lightning.qubit', wires= n_qubits)
-    weights = 2 * np.pi * np.random.random(size=(n_layers, 3, n_qubits - 1), requires_grad=True)
-    x = 2 * np.pi *np.random.random(size = (n_qubits-1))
-        
+    
+    dev = qml.device('default.qubit.jax', wires= n_qubits, prng_key = key)
+    
+    weights = jax.random.uniform(key, minval=0, maxval= jnp.pi, shape=(n_layers,3,n_qubits - 1))
+    x = jax.random.uniform(key, minval = 0, maxval = jnp.pi, shape = (n_qubits-1,))
+    
     def block(weights):
         for i in range(1,n_qubits):
             qml.IsingXX(weights[0][i-1], wires=[0, i])
@@ -30,9 +33,9 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
             qml.IsingZZ(weights[1][i-1], wires=[0, i])
         for i in range(1,n_qubits):
             qml.IsingYY(weights[2][i-1], wires=[0, i])
-        
-    @qml.qnode(dev, interface="autograd")
-    def PQC(weights, x):
+    
+    @qml.qnode(dev, interface = "jax")
+    def circuit(weights, x):
         '''
         Parametrized Quantum Circuit with Ising architecture from Emmanoulopuolos and Dimoska.
                 Parameters:
@@ -46,11 +49,13 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
         qml.AngleEmbedding(x,wires=range(n_qubits)[:-1])   # Features x are embedded in rotation angles
         for j in range(n_layers):
             block(weights[j])
-        return qml.expval(qml.PauliZ(wires=n_qubits-1))
+        return qml.expval(qml.PauliZ(wires=n_qubits-1))  
     
+    vcircuit = jax.vmap(circuit, in_axes = (None,0), out_axes = 0)  
+     
     if bool_test == True:
-        print(PQC(weights, x))
+        print(circuit(weights, x))
     if bool_draw == True:
-        print(qml.draw(PQC,expansion_strategy ="device")(weights,x))
+        print(qml.draw(circuit,expansion_strategy ="device")(weights,x))
             
-    return PQC, weights, n_qubits
+    return vcircuit, circuit, weights, n_qubits
