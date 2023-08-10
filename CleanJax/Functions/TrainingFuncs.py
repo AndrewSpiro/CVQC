@@ -3,8 +3,9 @@ from pennylane import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-import joblib
 import pickle
+import jax
+from jax import numpy as jnp
 
 
 def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, seed = 0):
@@ -122,15 +123,10 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
     elif loss_function == "square_loss":
         def square_loss(targets, predictions):
-            loss = 0
-            for t, p in zip(targets, predictions):
-                loss += (t - p) ** 2
-            loss = loss / len(targets)
-
-            return 0.5*loss
+            return jnp.mean((targets - predictions) ** 2)
         
         def cost(weights, x, y):
-            predictions = [circuit(weights, x_) for x_ in x]
+            predictions = circuit(weights, x)
             return square_loss(y, predictions)
     
     valid_optimizers = ['qml.AdamOptimizer', 'qml.AdagradOptimizer']
@@ -146,17 +142,22 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
     
     train_size = len(train)
     batch_size = train_size//max_steps
-    cst = [cost(weights, x, target_y)]
-    cst_t = [cost(weights, x_t, target_y_t)]
-    
+    cst = []
+    cst.append(cost(weights, x, target_y))
+    cst_t = []
+    cst_t.append(cost(weights, x_t, target_y_t))
+        
     for i in tqdm(range(epochs)):
         for step in range(max_steps):
             # Select batch of data
             batch_index = np.random.randint(0, max_steps, batch_size)
             x_batch = x[batch_index]
             y_batch = target_y[batch_index]
+            jax_x_batch = jnp.array(x_batch)
+            jax_y_batch = jnp.array(y_batch)
             # Update the weights by one optimizer step
-            weights,_,_ = opt.step(cost, weights, x_batch, y_batch)  # Calculating weights using the batches.
+            gradient = jax.grad(cost)(weights, jax_x_batch, jax_y_batch)
+            weights -= learning_rate * gradient         
         c = cost(weights, x, target_y)  # Calculating the cost using the whole train data
         c_t = cost(weights, x_t, target_y_t)
         cst.append(c)

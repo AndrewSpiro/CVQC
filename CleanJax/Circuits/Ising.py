@@ -1,7 +1,8 @@
 import pennylane as qml
 from pennylane import numpy as np
 from DataPreprocessing import r
-def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, bool_test = False, bool_draw = False):
+import jax
+def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, jax_key = 0,bool_test = False, bool_draw = False):
     '''
     Creates a circuit with Ising architecture (Emmanoulopuolos and Dimoska) with a specific number of qubits and layers. Also initializes encodings and weights.
     
@@ -17,7 +18,8 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
                     n_qubits (int): Number of qubits in the circuit.
     '''
     np.random.seed(seed)
-    dev = qml.device('lightning.qubit', wires= n_qubits)
+    key = jax.random.PRNGKey(jax_key)
+    dev = qml.device('default.qubit.jax', wires= n_qubits, prng_key = key)
     weights = 2 * np.pi * np.random.random(size=(n_layers, 3, n_qubits - 1), requires_grad=True)
     x = 2 * np.pi *np.random.random(size = (n_qubits-1))
         
@@ -29,7 +31,7 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
         for i in range(1,n_qubits):
             qml.IsingYY(weights[2][i-1], wires=[0, i])
         
-    @qml.qnode(dev, interface="autograd")
+    @qml.qnode(dev, interface="jax")
     def PQC(weights, x):
         '''
         Parametrized Quantum Circuit with Ising architecture from Emmanoulopuolos and Dimoska.
@@ -45,10 +47,12 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, b
         for j in range(n_layers):
             block(weights[j])
         return qml.expval(qml.PauliZ(wires=0))
+    
+    vcircuit = jax.vmap(PQC, in_axes = (None,0), out_axes = 0)  
 
     if bool_test == True:
         print(PQC(weights, x))
     if bool_draw == True:
         print(qml.draw(PQC,expansion_strategy ="device")(weights,x))
             
-    return PQC, weights, n_qubits
+    return vcircuit, PQC, weights, n_qubits
