@@ -123,7 +123,8 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
     elif loss_function == "square_loss":
         def square_loss(targets, predictions):
-            return jnp.mean((targets - predictions) ** 2)
+            reshaped_predictions = predictions.reshape(len(predictions),1)
+            return jnp.mean((targets - reshaped_predictions) ** 2)
         
         def cost(weights, x, y):
             predictions = circuit(weights, x)
@@ -146,6 +147,7 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
     cst.append(cost(weights, x, target_y))
     cst_t = []
     cst_t.append(cost(weights, x_t, target_y_t))
+    print("1 This should be about 0.03: " + str(cst_t))
         
     for i in tqdm(range(epochs)):
         for step in range(max_steps):
@@ -156,10 +158,13 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
             jax_x_batch = jnp.array(x_batch)
             jax_y_batch = jnp.array(y_batch)
             # Update the weights by one optimizer step
+            print("2 This should be about 0.03: " + str(cost(weights, jax_x_batch, jax_y_batch)))
             gradient = jax.grad(cost)(weights, jax_x_batch, jax_y_batch)
             weights -= learning_rate * gradient         
         c = cost(weights, x, target_y)  # Calculating the cost using the whole train data
+        print("3 This should be about 0.03: " + str(cost(weights, x, target_y)))
         c_t = cost(weights, x_t, target_y_t)
+        print("4 This should be about 0.03: " + str(cost(weights, x_t, target_y_t)))
         cst.append(c)
         cst_t.append(c_t)
     
@@ -182,10 +187,3 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
 def save_results_params(results_and_params, dict_path):
     with open(dict_path, 'wb') as fp:
         pickle.dump(results_and_params, fp)
-        
-def save_circuit(circuit, circuit_path):
-    t = circuit.qtape.to_openqasm()
-    t_cut = t[:-23]
-    t_file = open(circuit_path, 'w')
-    t_file.write(t_cut)
-    t_file.close()
