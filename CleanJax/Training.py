@@ -5,10 +5,10 @@ from Functions.TrainingFuncs import *
 from Functions.TestingFuncs import load_results_params
 
 
-circuit, _,weights, n_qubits = initialize_Ising_circuit(bool_draw = True)
+circuit, _,_, n_qubits = initialize_Ising_circuit(bool_draw = True)
 
 dict = load_results_params('Results/TEST/TEST dict')
-#weights = dict.get("weights")
+weights = dict.get("weights")
 
 
 train, test, train_size, test_size, train_ratio, indices = split_train_test(full_signal, n_qubits, random = True)
