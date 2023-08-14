@@ -3,9 +3,8 @@ from pennylane import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import joblib
 import pickle
-import jax
-from jax import numpy as jnp
 
 
 def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, seed = 0):
@@ -26,25 +25,25 @@ def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, see
                     train_ratio: fraction of full data to be used for training. Must be less than 1.
                     indices: gives the index of each "group" in the original data. If random is False, indices is just the range of integers from 0 to the number of groups.
     '''
-    
+
     grouped_data = np.zeros((len(data)-n_qubits+1, n_qubits))
     for i in range(len(data)-n_qubits+1):
         grouped_data[i] = (np.array(data[i:i+n_qubits])).squeeze()
 
-    
+
     indices = np.arange(0,len(grouped_data))   
     if random == True:
         np.random.seed(seed)
         np.random.shuffle(indices)
     shuffled_grouped_data = grouped_data[indices]
-    
+
     train = shuffled_grouped_data[:int(train_ratio*(len(shuffled_grouped_data)))]
     test = shuffled_grouped_data[int(train_ratio*(len(shuffled_grouped_data))):]
     train_size = len(train)
     test_size = len(test)
-    
+
     return train, test, train_size, test_size, train_ratio, indices
-    
+
 def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, scaler_max = 0.8):
     '''
     Scales the data for embedding in the PQC. By default, scales all values to be between 0.2 and 0.8.
@@ -71,10 +70,10 @@ def scale_data(train, test, train_size, test_size, n_qubits, scaler_min = 0.2, s
     scaled_test_1d = scaler.transform(test_1d)
     scaled_train = scaled_train_1d.reshape(train_size,n_qubits)
     scaled_test = scaled_test_1d.reshape(test_size, n_qubits)
-    
+
     final_train = scaled_train
     final_test = scaled_test
-    
+
     return final_train, final_test, scaler
 
 def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, epochs: int, loss_function = 'square_loss', optimizer = 'qml.AdamOptimizer' , learning_rate = 0.1, bool_plot = False, save_plot: str = None):
@@ -99,7 +98,7 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
                     x_t: input values for testing
                     target_y_t: target values for training
     '''
-    
+
     def input_target_split(data):
         '''
         For a 2-D array, moves along axis = 0 and splits each array of size N into an "input" array of size N-1 and a "target" array of size N.
@@ -117,21 +116,23 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
             x[i] = data[i][:-1]
             target_y[i] = data[i][-1]
         return x, target_y
-    
+
     valid_loss_functions = ["square_loss"]
     if loss_function not in valid_loss_functions:
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
     elif loss_function == "square_loss":
         def square_loss(targets, predictions):
-            reshaped_predictions = predictions.reshape(len(predictions),1)
-            return jnp.mean((targets - reshaped_predictions) ** 2)
-        
-        def not_jit_cost(weights, x, y):
-            predictions = circuit(weights, x)
+            loss = 0
+            for t, p in zip(targets, predictions):
+                loss += (t - p) ** 2
+            loss = loss / len(targets)
+
+            return 0.5*loss
+
+        def cost(weights, x, y):
+            predictions = [circuit(weights, x_) for x_ in x]
             return square_loss(y, predictions)
-        
-        cost = jax.jit(not_jit_cost)
-    
+
     valid_optimizers = ['qml.AdamOptimizer', 'qml.AdagradOptimizer']
     if optimizer not in valid_optimizers:
         raise ValueError("Invalid loss function! Only 'square_loss' is allowed.")
@@ -139,33 +140,28 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
         opt = qml.AdamOptimizer(learning_rate)
     elif optimizer == 'qml.AdagradOptimizer':
         opt = qml.AdagradOptimizer(learning_rate)      
-        
+
     x, target_y = input_target_split(train)
     x_t, target_y_t = input_target_split(test)
-    
+
     train_size = len(train)
     batch_size = train_size//max_steps
-    cst = []
-    cst.append(cost(weights, x, target_y))
-    cst_t = []
-    cst_t.append(cost(weights, x_t, target_y_t))
-        
+    cst = [cost(weights, x, target_y)]
+    cst_t = [cost(weights, x_t, target_y_t)]
+
     for i in tqdm(range(epochs)):
-        for step in range(max_steps):
+        for step in tqdm(range(max_steps)):
             # Select batch of data
             batch_index = np.random.randint(0, max_steps, batch_size)
             x_batch = x[batch_index]
             y_batch = target_y[batch_index]
-            jax_x_batch = jnp.array(x_batch)
-            jax_y_batch = jnp.array(y_batch)
             # Update the weights by one optimizer step
-            gradient = jax.grad(cost)(weights, jax_x_batch, jax_y_batch)
-            weights -= learning_rate * gradient         
+            weights,_,_ = opt.step(cost, weights, x_batch, y_batch)  # Calculating weights using the batches.
         c = cost(weights, x, target_y)  # Calculating the cost using the whole train data
         c_t = cost(weights, x_t, target_y_t)
         cst.append(c)
         cst_t.append(c_t)
-    
+
     if bool_plot == True or save_plot != None:
         plt.figure()
         plt.semilogy(range(len(cst)), cst, 'b', label = "train")
@@ -179,9 +175,16 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
             plt.savefig(save_plot)
         if bool_plot == True:
             plt.show()
-    
+
     return(weights, x_t, target_y_t)
 
 def save_results_params(results_and_params, dict_path):
     with open(dict_path, 'wb') as fp:
         pickle.dump(results_and_params, fp)
+
+def save_circuit(circuit, circuit_path):
+    t = circuit.qtape.to_openqasm()
+    t_cut = t[:-23]
+    t_file = open(circuit_path, 'w')
+    t_file.write(t_cut)
+    t_file.close()

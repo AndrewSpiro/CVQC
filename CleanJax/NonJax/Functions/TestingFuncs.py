@@ -4,11 +4,10 @@ from matplotlib import pyplot as plt
 from DataPreprocessing import full_signal
 import pickle
 import pennylane as qml
-from jax import numpy as jnp
 
 
 
-def make_predictions(circuit,weights, inputs, vmapped=False):
+def make_predictions(circuit,weights, inputs):
     '''
     Uses test data and weights obtained from training to make predictions.
     
@@ -18,20 +17,11 @@ def make_predictions(circuit,weights, inputs, vmapped=False):
             Returns:
                     predictions: An array of predicted values, each evaluated by a PQC using weights and some input data. Each value is an expectation value from the PQC and is therefore scale from -1 to 1.
     '''
-    
-    if vmapped==True:
-        print(inputs.shape)
-        predictions = circuit(weights, inputs)
-        print(predictions.shape)
-        print(type(predictions))
-    
-    else:
-        test_size = len(inputs)
-        predictions = np.zeros((test_size,1))
-        for i in range(test_size):
-            predictions[i] = (circuit(weights, inputs[i]))
-        predictions = predictions.reshape((test_size, 1))
-    
+    test_size = len(inputs)
+    predictions = np.zeros((test_size,1))
+    for i in range(test_size):
+        predictions[i] = (circuit(weights, inputs[i]))
+    predictions = predictions.reshape((test_size, 1))
     return predictions
 
 
@@ -49,16 +39,10 @@ def calc_MSE(scaled_inputs, scaled_predictions, scaled_targets, bool_scaled):
     '''
     if bool_scaled == True:
         mse = MSE(scaled_predictions, scaled_targets)
-        reshaped = scaled_predictions.reshape(len(scaled_predictions),1)
-        print(scaled_targets.shape)
-        print(reshaped.shape)
-        print('mse: ' + str(mse))
-        print('jax square loss:' + str(jnp.mean((scaled_targets - reshaped) ** 2)))
-        print('np square loss:' + str(np.mean((scaled_targets - reshaped) ** 2)))
         forward_mse = forward(scaled_inputs, scaled_targets)        
     else:
         inputs = inverse_transform(scaled_inputs)
-        predictions = inverse_transform(scaled_predictions.reshape(-1,1))
+        predictions = inverse_transform(scaled_predictions)
         targets = inverse_transform(scaled_targets)
         mse = MSE(predictions, targets)
         forward_mse = forward(inputs, targets)
@@ -95,7 +79,7 @@ def inverse_transform(scaled_data, scaler):
     data = scaler.inverse_transform(scaled_data)
     return data
     
-def test(circuit, scaled_inputs, scaled_targets, scaler, weights, save_mse: str = None, bool_scaled = False, vmapped = False):
+def test(circuit, scaled_inputs, scaled_targets, scaler, weights, save_mse: str = None, bool_scaled = False):
     '''
             Parameters:
                     inputs: Test data
@@ -106,10 +90,10 @@ def test(circuit, scaled_inputs, scaled_targets, scaler, weights, save_mse: str 
                     save_mse (str): If None, the mse will not be saved, otherwise, the forward mse will be saved to the path given as the string.
                     bool_scaled: If True, the mse is calculated using the scaled values. If False, the mse is calculated using the original (unscaled) values.
     '''
-    scaled_predictions = make_predictions(circuit=circuit, weights=weights, inputs=scaled_inputs, vmapped = vmapped)
+    scaled_predictions = make_predictions(circuit=circuit, weights=weights, inputs=scaled_inputs)
     mse, forward_mse = calc_MSE(scaled_inputs, scaled_predictions, scaled_targets, bool_scaled = bool_scaled)
     if bool_scaled == True:
-        predictions = inverse_transform(scaled_predictions.reshape(-1,1), scaler)
+        predictions = inverse_transform(scaled_predictions, scaler)
         targets = inverse_transform(scaled_targets, scaler)
     return predictions, targets, mse, forward_mse
         
@@ -124,7 +108,7 @@ def plot(predictions, targets, indices, n_qubits, bool_plot: bool = False, save_
         target_indices = indices[-len(targets):] + n_qubits - 1
         
         plt.figure()
-        plt.plot(full_signal, label = "Signal")
+        plt.plot(full_signal, label = " TEST Signal")
         plt.scatter(target_indices, predictions, label = "Predictions")
         plt.scatter(target_indices, targets, label = "Targets")
         plt.xlabel(plot_labels[0])
