@@ -15,11 +15,12 @@ data_frame = pd.read_csv("AAPL max.csv", usecols=["Close"])
 
 data = pd.DataFrame.to_numpy(data_frame)
 np.concatenate(data)
-# #sample_size = 10080  # Limiting dataset to what was used in the paper.
+#sample_size = 10080  # Limiting dataset to what was used in the paper.
 sample_size = 200
 sub_data = data[:sample_size + 1]  # A small sample
 
 print(sub_data[:10])
+plt.figure()
 plt.plot(sub_data)
 
 # %%    
@@ -28,6 +29,7 @@ pc = np.zeros((N,1))
 for i in range(N-1):
   pc[i] = (sub_data[i+1]-sub_data[i])/sub_data[i]
 # %%
+plt.figure()
 plt.scatter(np.linspace(0,N,N),pc,marker ='.')
 #plt.ylim(-0.6,0.6)
 plt.show
@@ -40,7 +42,8 @@ for k in tqdm(range(N//2)):
         sum += (pc[i] * np.exp(2 * np.pi * i * k * 1j * 1/N))
     P[k] = np.abs(sum)**2
     nu[k] = k/N
-    
+ 
+plt.figure()    
 plt.loglog(nu, P)
 # %%
 num_components = 3
@@ -77,19 +80,20 @@ interval = (np.linspace(0,N,N)).reshape((N,1))
 components = np.zeros((N,num_components))
 for i in range(N):
     for j in range(num_components):
-        components[i][j] = amp_sample[j] + np.sin(DC_sample[j] * interval[i])
+        components[i][j] = amp_sample[j] * np.sin(DC_sample[j] * interval[i])
 DC_signal = np.sum(components, axis = -1)
 DC_signal = DC_signal.reshape(N,1)
 #  %%
 c_n = [0, 0.2, 0.5, 0.8, 1]
 noise_scale = np.abs(np.max(DC_signal)-np.min(DC_signal))
 np.random.seed(0)
-noise = np.random.uniform(0,1,N) * noise_scale *(c_n[3])
+noise = np.random.uniform(0,1,N) * noise_scale*(c_n[0])
 noise = noise.reshape((N,1))
 trend = np.array([np.zeros(N), 5e-2 * np.linspace(0,N,N), 2* 5e-5 * np.square(np.linspace(0,N,N))])
 trend = trend.reshape(3,N,1)
 
 full_signal = DC_signal + noise + trend[0]
+plt.figure()
 plt.plot(range(N),full_signal)
 # %%
 r = num_components
@@ -175,7 +179,7 @@ for i in range(test_size):
   
 max_steps = 10
 optimizer = [qml.AdamOptimizer(.1), qml.AdagradOptimizer(.1)]
-opt = optimizer[1]
+opt = optimizer[0]
 batch_size = train_size//max_steps
 cst = [cost(weights, x, target_y)]  # initial cost
 cst_t = [cost(weights, x_t, target_y_t)]
@@ -195,11 +199,14 @@ for i in tqdm(range(epochs)):
   cst.append(c)
   cst_t.append(c_t)
 # %%
-
-plt.semilogy(range(len(cst)), cst, 'b')
-plt.semilogy(cst_t, 'r')
+plt.figure()
+plt.semilogy(range(len(cst)), cst, 'b', label = "train")
+plt.semilogy(cst_t, 'r', label = "test")
 plt.ylabel("Cost")
 plt.xlabel("Step")
+plt.title("Loss")
+plt.legend()
+plt.savefig('rand_300_loss.png')
 plt.show()
 print("initial cost" + str(cst[0]))
 print("final cost:" + str(cst[-1]))
@@ -209,12 +216,15 @@ for i in range(test_size):
   t_predictions[i] = (PQC(weights, x_t[i]))
 t_predictions = t_predictions.reshape((test_size, 1))
 
+transformed_mse = metrics.mean_squared_error(t_predictions,target_y_t)
+np.save('rand 300 transformed MSE', transformed_mse)
+
 real_predictions = scaler.inverse_transform(t_predictions)
 real_target = scaler.inverse_transform(target_y_t)
 
-plt.axline((1.5, 1.5), slope=1,color = '0',linestyle = '--')
-plt.plot(real_target[:-1], real_predictions[1:])
-plt.plot(real_target[:-1], real_target[1:])
+# plt.axline((1.5, 1.5), slope=1,color = '0',linestyle = '--')
+# plt.plot(real_target[:-1], real_predictions[1:])
+# plt.plot(real_target[:-1], real_target[1:])
 # %%
 unshuffled_pred = np.zeros(N)
 for i in range(len(real_predictions)):
@@ -229,6 +239,22 @@ for i in range(N):
   pred.append([unshuffled_pred[i]])
 
 # %%
-plt.plot(full_signal)
-plt.scatter(pred_index,pred)
-print('MSE: ' + str(metrics.mean_squared_error(real_predictions,real_target)))
+def forward(x):
+  data = x[:-1]
+  predictions = x[1:]
+  forward_mse = metrics.mean_squared_error(predictions,data)
+  return forward_mse, data, predictions
+
+forward_mse,_,_ = forward(real_target)
+
+plt.figure()
+plt.plot(full_signal, label = "signal")
+plt.scatter(pred_index,pred, label = "predictions")
+mse = str(metrics.mean_squared_error(real_predictions,real_target))
+np.save('rand_300_mse.npy', mse)
+plt.xlabel("Day")
+plt.ylabel("Percent of change")
+plt.title("Predictions")
+plt.legend()
+plt.figtext(x=0, y = 0, s = 'MSE=' + str(mse) + ', Forward=' + str(forward_mse))
+plt.savefig('rand_300_predictions.png')

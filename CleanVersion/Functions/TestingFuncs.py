@@ -21,6 +21,9 @@ def make_predictions(circuit,weights, inputs):
     predictions = np.zeros((test_size,1))
     for i in range(test_size):
         predictions[i] = (circuit(weights, inputs[i]))
+    plt.figure()
+    plt.plot([a[-1] for a in inputs],'b')
+    plt.plot(predictions, 'r')
     predictions = predictions.reshape((test_size, 1))
     return predictions
 
@@ -63,7 +66,6 @@ def forward(inputs, targets):
     for i in range(test_size):
         predictions[i] = inputs[i][-1]
     forward_mse = MSE(predictions,targets)
-    print(predictions)
     return forward_mse
 
 
@@ -98,7 +100,7 @@ def test(circuit, scaled_inputs, scaled_targets, scaler, weights, save_mse: str 
     return predictions, targets, mse, forward_mse
         
 
-def plot(predictions, targets, indices, n_qubits, bool_plot: bool = False, save_plot: str = None, mse = None, forward_mse = None, plot_labels = ['x-axis','y-axis']):
+def plot(predictions,targets, indices, n_qubits, bool_plot: bool = False, save_plot: str = None, mse = None, forward_mse = None, plot_labels = ['x-axis','y-axis']):
 
     if bool_plot == True or save_plot != None:
         if type(plot_labels) != list:
@@ -127,10 +129,3 @@ def load_results_params(dict_path):
     with open(dict_path, 'rb') as fp:
         results_params = pickle.load(fp)
     return results_params
-
-def load_circuit(circuit_path: str):
-    circuit_file = open(circuit_path, 'r')
-    circuit_string = circuit_file.read()
-    circuit_file.close()
-    circuit = qml.from_qasm(circuit_string)
-    return circuit

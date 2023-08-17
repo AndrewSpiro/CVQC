@@ -135,7 +135,7 @@ opt = optimizer[0]
 batch_size = train_size//max_steps
 # %%
 epochs = 10
-num_initializations = 20
+num_initializations = 50
 mse_list = np.zeros(num_initializations)
 
 for i in tqdm(range(num_initializations)):
@@ -166,4 +166,4 @@ for i in tqdm(range(num_initializations)):
     print('MSE: ' + str(mse_list[i]))
 
 # %%
-np.save('mse_list.npy',mse_list)
+np.save('adam_' + str(num_initializations) + '_mse.npy',mse_list)

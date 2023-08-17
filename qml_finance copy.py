@@ -13,8 +13,8 @@ apple = pd.read_csv("AAPL max.csv", usecols=["Close", "Date"])
 apl = pd.read_csv("AAPL max.csv", usecols = ["Close"])
 apl = pd.DataFrame.to_numpy(apl)
 np.concatenate(apl)
-sample_size = 10080  # Limiting dataset to what was used in the paper.
-#sample_size = 201
+#sample_size = 10080  # Limiting dataset to what was used in the paper.
+sample_size = 201
 aapl = apl[:sample_size]  # A small sample
 print(apl)
 plt.plot(aapl)
@@ -39,8 +39,8 @@ for k in tqdm(range(N//2)):
     P[k] = np.abs(sum)**2
     nu[k] = k/N
  
-#threshold = 1    
-threshold = 50
+threshold = 1
+#threshold = 50
 plt.loglog(nu, P)
 # %%
 amp2 = []
@@ -52,6 +52,7 @@ for i in range(N//2):
 amp = np.sqrt(amp2)
 print(amp)
 print(DC)
+# save amp and DC
 
 num_components = len(DC)
 DC_sample = DC[0:num_components]
@@ -60,7 +61,7 @@ interval = (np.linspace(0,N,N)).reshape((N,1))
 components = np.zeros((N,num_components))
 for i in range(N):
     for j in range(num_components):
-        components[i][j] = amp_sample[j] + np.sin(DC_sample[j] * interval[i])
+        components[i][j] = amp_sample[j] * np.sin(DC_sample[j] * interval[i])
 DC_signal = np.sum(components, axis = -1)
 DC_signal = DC_signal.reshape(N,1)
 
@@ -102,7 +103,10 @@ weights = 2 * np.pi * np.random.random(size=(n_layers, 3, r), requires_grad=True
 x = 2 * np.pi *np.random.random(size = (r))
 
 PQC(weights, x)
-print(qml.draw(PQC,expansion_strategy ="device")(weights,x)) 
+#print(qml.draw(PQC,expansion_strategy ="device")(weights,x)) 
+qml.drawer.use_style('black_white')
+fig, ax = qml.draw_mpl(PQC)(weights, x)
+fig.show()
 # %%
 train = full_signal[:int(N*2/3)]
 test = full_signal[int(N*2/3):]
@@ -148,7 +152,7 @@ for i in range(test_size//N_QUBITS):
   x_t[i] = final_test[i][:-1]
   target_y_t[i] = final_test[i][-1]
   
-max_steps = 100 # increase for larger sample sizes
+max_steps = 10 # increase for larger sample sizes
 optimizer = [qml.AdamOptimizer(.1), qml.AdagradOptimizer(.1)]
 opt = optimizer[0]
 batch_size = train_size//max_steps
@@ -232,7 +236,7 @@ plt.ylabel("Percent of change")
 plt.title("Predictions")
 plt.legend()
 plt.figtext(x=0, y = 0, s = 'MSE=' + str(mse) + ', Forward=' + str(forward_mse))
-plt.savefig('predictions.png')
+plt.savefig('new predictions.png')
 
 print('MSE: ' + str(mse))
 # %%

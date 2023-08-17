@@ -99,7 +99,10 @@ weights = 2 * np.pi * np.random.random(size=(N_QUBITS-1,N_PARAMS_B), requires_gr
 x = 2 * np.pi *np.random.random(size = (N_QUBITS))
 
 PQC(weights,x)
-print(qml.draw(PQC,expansion_strategy ="device")(weights,x)) 
+#print(qml.draw(PQC,expansion_strategy ="device")(weights,x)) 
+qml.drawer.use_style('black_white')
+fig, ax = qml.draw_mpl(PQC)(weights, x)
+fig.show()
 # %%
 train = full_signal[:int(N*2/3)]
 test = full_signal[int(N*2/3):]

@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 from pennylane import numpy as np
 
-def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, key = jax.random.PRNGKey(0), bool_test = False, bool_draw = False):
+def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, key = jax.random.PRNGKey(0), bool_test = False, bool_draw = False, weights = None, x = 'a'):
     '''
     Creates a circuit with Ising architecture (Emmanoulopuolos and Dimoska) with a specific number of qubits and layers. Also initializes encodings and weights.
     
@@ -23,8 +23,10 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, k
     
     dev = qml.device('default.qubit.jax', wires= n_qubits, prng_key = key)
     
-    weights = jax.random.uniform(key, minval=0, maxval= jnp.pi, shape=(n_layers,3,n_qubits - 1))
-    x = jax.random.uniform(key, minval = 0, maxval = jnp.pi, shape = (n_qubits-1,))
+    if weights == None:
+        weights = jax.random.uniform(key, minval= 0, maxval= 2 * np.pi, shape=(n_layers,3,n_qubits - 1))
+    if x == 'a':
+        x = jax.random.uniform(key, minval = 0, maxval = np.pi, shape = (n_qubits-1,))
     
     def block(weights):
         for i in range(1,n_qubits):
@@ -46,11 +48,11 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, k
                 Returns:
                         qml.expval(qml.PauliZ(wire = 0)): Expectation value after applying the Pauli Z operator.
                 '''
-        qml.AngleEmbedding(x,wires=range(n_qubits)[:-1])   # Features x are embedded in rotation angles
+        qml.AngleEmbedding(x,wires=range(n_qubits)[1:])   # Features x are embedded in rotation angles
         for j in range(n_layers):
             block(weights[j])
-        return qml.expval(qml.PauliZ(wires=n_qubits-1))  
-    
+        return qml.expval(qml.PauliZ(wires=0))
+        
     vcircuit = jax.vmap(circuit, in_axes = (None,0), out_axes = 0)  
      
     if bool_test == True:
