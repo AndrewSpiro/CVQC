@@ -124,9 +124,9 @@ def plot(predictions, targets, indices, n_qubits, bool_plot: bool = False, save_
         target_indices = indices[-len(targets):] + n_qubits - 1
         
         plt.figure()
-        plt.plot(full_signal, label = "Signal")
-        plt.scatter(target_indices, predictions, label = "Predictions")
-        plt.scatter(target_indices, targets, label = "Targets")
+        plt.plot(full_signal, label = "Signal", alpha = 0.5)
+        plt.scatter(target_indices, targets, label = "Targets", alpha = 0.5)
+        plt.scatter(target_indices, predictions, label = "Predictions", alpha = 0.5)
         plt.xlabel(plot_labels[0])
         plt.ylabel(plot_labels[1])
         plt.title("Predictions")

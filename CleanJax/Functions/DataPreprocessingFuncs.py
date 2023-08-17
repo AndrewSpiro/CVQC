@@ -105,7 +105,7 @@ def find_components(load_PSD = None, signal= None, threshold: int = None, bool_p
     return(DC, amp, N)
 
 
-def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2], N, bool_plot = False):
+def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2], N, bool_plot = False, labels: str = ['Full Singal' ,'Day', 'Percent of change']):
     '''
     This constructs a signal from three components: sinusoidal signals, noise, and a long term trend.
     
@@ -138,7 +138,9 @@ def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2
     full_signal = DC_signal + noise + trend[trend_type]
     if bool_plot == True:
         plt.figure()
-        print('Full signal:')
+        plt.title(labels[0])
+        plt.xlabel(labels[1])
+        plt.ylabel(labels[2])
         plt.plot(range(N),full_signal)
         plt.show()
     r = num_components
