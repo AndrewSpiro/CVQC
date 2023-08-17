@@ -15,7 +15,7 @@ def load_data(dataset, usecols = all, skiprows = None, sample_size = all, bool_p
                     sample_size (int): Number of datapoints to include i.e., number of rows except headers.
                     bool_plot (boolean): If True, will plot the data
             Returns: 
-                    dataset (np.array): a 1-D array
+                    dataset (numpy.array): a 1-D array
     '''
     data_frame = pd.read_csv(dataset, usecols=usecols)
     data = pd.DataFrame.to_numpy(data_frame)
@@ -34,9 +34,9 @@ def gradient(data, bool_plot = False):
     Calculates the percent of change of an input dataset.
     
             Parameters:
-                    sub_data ( 1_D np.array of size N): The sequential data for which the gradient should be calculated.
+                    sub_data (numpy.array): A 1-D array of size N. The sequential data for which the gradient should be calculated.
             Returns:
-                    pc (1-D np.array of size N-1): The gradient (percent of change) of the input data. The nth value is the rate of change from xn to xn+1.
+                    pc numpy.array): A 1-D array of size N. The gradient (percent of change) of the input data. The nth value is the rate of change from xn to xn+1.
     '''
     N = len(data)
     pc = np.zeros((N,1))
@@ -55,14 +55,14 @@ def find_components(load_PSD = None, signal= None, threshold: int = None, bool_p
     Performs a discrete Fourier transform and calculates the modulus squared to estimate the signal's power spectral density.
     
             Parameters:
-                    signal (1-D np.array): Data for which the power spectral density is to be estimated.
+                    signal (numpy.array): 1-D data for which the power spectral density is to be estimated.
                     threshold (int): The minimum amplitude squared required for a component frequency to be added to the list of deterministic components.
                     bool_plot (bool) = If True, will show the periodogram.
                     save_components (str, optional) = The name of the file to which the deterministic components will be saved. If not specified, the deterministic components will not be saved.
             Returns:
-                    DC (1-D np.array): Array containing the frequencies of the component signals with amplitudes above the threshold (the deterministic components).
-                    amp (1-D np.array): Array containing the amplitudes of the deterministic components. (DC[i] and amp[i] give the frequency and amplitude respectively of a deterministic component signal.)
-                    N = length of the original signal.
+                    DC (numpy.array): 1-D array containing the frequencies of the component signals with amplitudes above the threshold (the deterministic components).
+                    amp (numpy.array): 1-D array containing the amplitudes of the deterministic components. (DC[i] and amp[i] give the frequency and amplitude respectively of a deterministic component signal.)
+                    N (int)= Length of the original signal.
     '''
     
     if load_PSD != None:
@@ -76,7 +76,8 @@ def find_components(load_PSD = None, signal= None, threshold: int = None, bool_p
             raise ValueError("'signal' is None: If no file is loaded, a signal and threshold must be given")
         if threshold == None:
             raise ValueError("'threshold' is None: If no file is loaded, a signal and threshold must be specified")
-        else: 
+        else:
+            # Calculate the power spectral density
             N = len(signal)
             P = np.zeros((N//2,1))
             nu = np.zeros((N//2,1))
@@ -89,10 +90,13 @@ def find_components(load_PSD = None, signal= None, threshold: int = None, bool_p
                 
             if bool_plot == True:
                 plt.figure()
-                print('Periodogram:')
+                plt.title('Periodogram')
+                plt.ylabel('Amplitude squared')
+                plt.xlabel('Frequency')
                 plt.loglog(nu, P)
                 plt.show()
 
+# This for loop adds all amplitudes above the specified threshold to the list amp and their corresponding frequencies to the list DC.
             amp2 = []
             DC = []
             for i in range(N//2):
@@ -107,17 +111,17 @@ def find_components(load_PSD = None, signal= None, threshold: int = None, bool_p
 
 def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2], N, bool_plot = False, labels: str = ['Full Singal' ,'Day', 'Percent of change']):
     '''
-    This constructs a signal from three components: sinusoidal signals, noise, and a long term trend.
+    Constructs a signal from three components: sinusoidal signals, noise, and a long term trend. The sinusoidal signals are given as the parameters DC (a 1-D array of each signal's frequency) and amp (a 1-D array of the corresponding amplitudes)
     
             Parameters:
-                    DC (1-D np.array): An array containing the frequencies of the deterministic components.
-                    amp (1-D np.array): An array containing the amplitudes of the deterministic components.
+                    DC (1-D numpy.array): An array containing the frequencies of the deterministic components.
+                    amp (1-D numpy.array): An array containing the amplitudes of the deterministic components.
                     c_noise (0, 1, 2, 3, or 4): Noise coefficient to determine the strength off the noise signal: 0 gives no noise, 4 gives a noise signal for which the maximum signal to noise ratio is 1. The coefficients scale the noise linearly.
-                    trend_type (0,1,2): 0 -> flat trend: the signal has no long term trend. 1 -> linear trend: the signal has a linear long-term trend with gradient 5e-2. 2 -> quadratic trend: the signal has a quadratic linear trend with gradient 10e-5.
-                    N = length of the original signal.
+                    trend_type (0,1, or 2): 0 -> flat trend: the signal has no long term trend. 1 -> linear trend: the signal has a linear long-term trend with gradient 5e-2. 2 -> quadratic trend: the signal has a quadratic linear trend with gradient 10e-5.
+                    N (int)= length of the original signal.
             Returns:
-                    full_signal (1-D np.array) = The signal consisting of the deterministic components, additive noise, and a long term trend.
-                    r  (int) = The number of deterministic components.
+                    full_signal (1-D numpy.array) = The signal consisting of the deterministic (sinusoidal) components, additive noise, and a long term trend.
+                    r  (int) = The number of deterministic components. In essence, the length of DC or amp.
 '''
     num_components = len(DC)
     interval = (np.linspace(0,N,N)).reshape((N,1))
@@ -125,7 +129,7 @@ def build_signal(DC, amp, c_noise: Literal[0,1,2,3,4], trend_type: Literal[0,1,2
     for i in range(N):
         for j in range(num_components):
             components[i][j] = amp[j] * np.sin(DC[j] * interval[i])  # Computing A*sin(omega*x) for each component and x
-    DC_signal = np.sum(components, axis = -1)  # Computing A*sin(omega*x) for each x
+    DC_signal = np.sum(components, axis = -1)  # Summing over the components, effectively computing A*sin(omega*x) for each x
     DC_signal = DC_signal.reshape(N,1)
     c_n = [0, 0.2, 0.5, 0.8, 1]  # 5 possible noise coefficients
     noise_scale = np.abs(np.max(DC_signal)-np.min(DC_signal))
