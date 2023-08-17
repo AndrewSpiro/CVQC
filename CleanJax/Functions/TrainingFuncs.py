@@ -6,6 +6,7 @@ from tqdm import tqdm
 import pickle
 import jax
 from jax import numpy as jnp
+import os
 
 
 def split_train_test(data, n_qubits: int, train_ratio = 2/3, random = False, seed = 0):
@@ -176,12 +177,16 @@ def train_model(train, test, weights, circuit, n_qubits: int, max_steps: int, ep
         plt.legend()
         plt.figtext(x=0, y = 0, s = "initial train cost" + str(cst[0]) + "; final train cost:" + str(cst[-1]))
         if save_plot != None:
-            plt.savefig(save_plot)
+            if not os.path.exists(save_plot):
+                os.makedirs(save_plot)
+            plt.savefig(save_plot + 'loss')
         if bool_plot == True:
             plt.show()
     
     return(weights, x_t, target_y_t)
 
 def save_results_params(results_and_params, dict_path):
-    with open(dict_path, 'wb') as fp:
+    if not os.path.exists(dict_path):
+        os.makedirs(dict_path)
+    with open(dict_path + 'dict', 'wb') as fp:
         pickle.dump(results_and_params, fp)

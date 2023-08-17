@@ -5,6 +5,7 @@ from DataPreprocessing import full_signal
 import pickle
 import pennylane as qml
 from jax import numpy as jnp
+import os
 
 
 
@@ -134,7 +135,9 @@ def plot(predictions, targets, indices, n_qubits, bool_plot: bool = False, save_
         if mse != None and forward_mse != None:
             plt.figtext(x=0, y = 0, s = 'MSE=' + str(mse) + ', Forward=' + str(forward_mse))
         if save_plot != None:
-            plt.savefig(save_plot)
+            if not os.path.exists(save_plot):
+                os.makedirs(save_plot)
+            plt.savefig(save_plot + 'predictions')
         if bool_plot == True:
             plt.show
     return
