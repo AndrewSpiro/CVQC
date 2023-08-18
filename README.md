@@ -1,6 +1,6 @@
 # GPU-Optimized Machine Learning Code Repository
 
-This repository contains scripts, Jupyter notebooks, and scripts containing function libraries. This repository is designed to facilitate data preprocessing, model training, and testing for time series forecasting tasks with parametrized quantum circuits. The code is optimized for GPU acceleration using the Jax library.
+This repository contains scripts, Jupyter notebooks, and scripts containing function libraries. This repository is designed to facilitate data preprocessing, model training, and testing for time series forecasting tasks with parametrized quantum circuits. It is reusable with different datasets, circuit architectures (MPS and 2-layer Ising currently implemented), and training hyperparameters. The code is optimized for GPU acceleration using the Jax library.
 
 ## Contents
 
