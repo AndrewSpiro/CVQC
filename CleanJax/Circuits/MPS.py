@@ -11,7 +11,6 @@ def initialize_MPS_circuit(n_qubits: int = r+1, seed = 0, jax_key = 0,bool_test 
     key = jax.random.PRNGKey(jax_key)
     dev = qml.device('default.qubit.jax', wires= n_qubits, prng_key = key)
     weights = 2 * np.pi * np.random.random(size=(n_qubits-1,n_params_b))
-    print(weights.shape)
     x = 2 * np.pi *np.random.random(size = (n_qubits-1))
         
     def block(weights, wires):
