@@ -37,6 +37,22 @@ This repository contains scripts, Jupyter notebooks, and scripts containing func
 
 The `results` folder contains subfolders that store the results obtained from the Training and Testing stages. Each subfolder is named according to the dataset, architecture, and hyperparameters used in training and testing. This structure ensures reusability and facilitates interpretation of the outcomes.
 
+## **Getting Started**
+
+1. **Installation:**
+    - Clone this repository to your local machine.
+    - Ensure you have the necessary dependencies installed, including Jax, Jaxlib and Pennylane.
+2. **Dataset Setup:**
+    - Prepare your time series dataset in a compatible format: CSV file containing sequential data of interest in one column in consecutive rows.
+    - Use the provided data preprocessing utilities to modify your data to suit your specific use cases. Functionalities include calculating gradient, extracting dominant signals, and artificially adding noise and long-term trends.
+3. **Model Training and Testing:**
+    - Explore the Jupyter notebooks to understand the training process and experiment with different circuit architectures.
+    - Customize hyperparameters to explore training and model performance.
+4. **Function Libraries:**
+    - Utilize the function libraries in the Functions directory to extend the functionality or create your own custom scripts.
+5. **Circuit Libraries:**
+    - Add new circuit architectures in the Circuits directory.
+
 ## Contact
 
 If you have any questions, suggestions, or feedback, please feel free to contact Andrew Spiro at andrew.charles.spiro@cern.ch. 
