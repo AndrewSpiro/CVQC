@@ -9,7 +9,7 @@ import os
 
 
 
-def make_predictions(circuit,weights, inputs, vmapped=False):
+def make_predictions(circuit,weights, inputs):
     '''
     Uses test data and weights obtained from training to make predictions.
     
@@ -20,18 +20,8 @@ def make_predictions(circuit,weights, inputs, vmapped=False):
                     predictions: An array of predicted values, each evaluated by a PQC using weights and some input data. Each value is an expectation value from the PQC and is therefore scale from -1 to 1.
     '''
     
-    if vmapped==True:
-        print(inputs.shape)
-        predictions = circuit(weights, inputs)
-        print(predictions.shape)
-        print(type(predictions))
-    
-    else:
-        test_size = len(inputs)
-        predictions = np.zeros((test_size,1))
-        for i in range(test_size):
-            predictions[i] = (circuit(weights, inputs[i]))
-        predictions = predictions.reshape((test_size, 1))
+    print(inputs.shape)
+    predictions = circuit(weights, inputs)
     
     return predictions
 
