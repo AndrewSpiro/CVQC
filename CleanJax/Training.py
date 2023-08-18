@@ -13,7 +13,7 @@ path = 'Results/' + Data + '/' + Architecture + '/' + str(Learning_rate) + '/' +
 
 
 initialize_circuit = import_circuit(Architecture)
-circuit, weights, n_qubits = initialize_MPS_circuit()
+circuit, weights, n_qubits = initialize_circuit()
 
 train, test, train_size, test_size, train_ratio, indices = split_train_test(full_signal, n_qubits, random = True)
 final_train, final_test, scaler = scale_data(train, test, train_size, test_size, n_qubits)
@@ -26,7 +26,8 @@ results_and_params = {
     "scaler" : scaler,
     "weights" : weights,
     "inputs" : x_t,
-    "targets" : target_y_t
+    "targets" : target_y_t,
+    "initialize_circuit" : initialize_circuit
 }
 
 save_results_params(results_and_params, path)
