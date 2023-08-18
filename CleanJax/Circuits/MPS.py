@@ -41,4 +41,4 @@ def initialize_MPS_circuit(n_qubits: int = r+1, seed = 0, jax_key = 0,bool_test 
         fig, ax = qml.draw_mpl(MPS_circuit)(weights,x)
         fig.show
             
-    return vcircuit, MPS_circuit, weights, n_qubits
+    return vcircuit, weights, n_qubits
