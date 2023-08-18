@@ -217,3 +217,13 @@ def save_results_params(results_and_params, path: str):
         os.makedirs(path)
     with open(path + 'dict', 'wb') as fp:
         pickle.dump(results_and_params, fp)
+        
+def import_circuit(circuit: str):
+    if circuit == 'MPS':
+        from Circuits.MPS import initialize_MPS_circuit
+        return initialize_MPS_circuit
+    if circuit == 'Ising':
+        from Circuits.Ising import initialize_Ising_circuit
+        return initialize_Ising_circuit
+    else:
+        raise ValueError("Invalid circuit. Only currently supported circuits are 'MPS' and 'Ising': use one of these or add a circuit to the Circuits library.")
