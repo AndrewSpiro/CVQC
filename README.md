@@ -1,6 +1,6 @@
 # GPU-Optimized Machine Learning Code Repository
 
-This repository contains scripts, Jupyter notebooks, and scripts containing function libraries. This repository is designed to facilitate data preprocessing, model training, and testing for time series forecasting tasks with parametrized quantum circuits. The code is optimized for GPU acceleration using the Jax library.
+This repository contains scripts, Jupyter notebooks, and scripts containing function libraries. This repository is designed to facilitate data preprocessing, model training, and testing for time series forecasting tasks with parametrized quantum circuits. It is reusable with different datasets, circuit architectures (MPS and 2-layer Ising currently implemented), and training hyperparameters. The code is optimized for GPU acceleration using the Jax library.
 
 ## Contents
 
@@ -36,6 +36,22 @@ This repository contains scripts, Jupyter notebooks, and scripts containing func
 ### Results
 
 The `results` folder contains subfolders that store the results obtained from the Training and Testing stages. Each subfolder is named according to the dataset, architecture, and hyperparameters used in training and testing. This structure ensures reusability and facilitates interpretation of the outcomes.
+
+## **Getting Started**
+
+1. **Installation:**
+    - Clone this repository to your local machine.
+    - Ensure you have the necessary dependencies installed, including Jax, Jaxlib and Pennylane.
+2. **Dataset Setup:**
+    - Prepare your time series dataset in a compatible format: CSV file containing sequential data of interest in one column in consecutive rows.
+    - Use the provided data preprocessing utilities to modify your data to suit your specific use cases. Functionalities include calculating gradient, extracting dominant signals, and artificially adding noise and long-term trends.
+3. **Model Training and Testing:**
+    - Explore the Jupyter notebooks to understand the training process and experiment with different circuit architectures.
+    - Customize hyperparameters to explore training and model performance.
+4. **Function Libraries:**
+    - Utilize the function libraries in the Functions directory to extend the functionality or create your own custom scripts.
+5. **Circuit Libraries:**
+    - Add new circuit architectures in the Circuits directory.
 
 ## Contact
 
