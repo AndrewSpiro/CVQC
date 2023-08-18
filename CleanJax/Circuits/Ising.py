@@ -55,4 +55,4 @@ def initialize_Ising_circuit(n_qubits: int = r+1, n_layers: int = 2, seed = 0, j
     if bool_draw == True:
         print(qml.draw(PQC,expansion_strategy ="device")(weights,x))
             
-    return vcircuit, PQC, weights, n_qubits
+    return vcircuit, weights, n_qubits
