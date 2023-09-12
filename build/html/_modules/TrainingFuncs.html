@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrainingFuncs &mdash; TSP 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">TrainingFuncs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for TrainingFuncs</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pennylane</span> <span class="k">as</span> <span class="nn">qml</span>
+<span class="kn">from</span> <span class="nn">pennylane</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="split_train_test">
+<a class="viewcode-back" href="../TrainingFuncs.html#TrainingFuncs.split_train_test">[docs]</a>
+<span class="k">def</span> <span class="nf">split_train_test</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits data into two sub-datsets: one for training and one for testing.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                    data (numpy.array): 1-D data to be split</span>
+<span class="sd">                    n_qubits (int): number of qubits in the circuit</span>
+<span class="sd">                    train_ratio (float): fraction of full data to be used for training. Must be less than 1.</span>
+<span class="sd">                    random (bool): if False (default), the data is split chronologically e.g., the first 2/3 of the data are used for training and the last 1/3 are used for testing. If True, the data is split randomly.</span>
+<span class="sd">                    seed (int): seed for np.random</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                    train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size//n_qubits, n_qubits)</span>
+<span class="sd">                    test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size//n_qubits, n_qubits)</span>
+<span class="sd">                    train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized &quot;groups&quot; in train)</span>
+<span class="sd">                    test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized &quot;groups&quot; in test)</span>
+<span class="sd">                    train_ratio: fraction of full data to be used for training. Must be less than 1.</span>
+<span class="sd">                    indices: gives the index of each &quot;group&quot; in the original data. If random is False, indices is just the range of integers from 0 to the number of groups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># This transforms the data, creating subgroups of n_qubits consecutive elements each. The first group contains the first n_qubits elements, the second contains the second n_qubits elements, and so on.</span>
+    <span class="c1"># For example, if the data is [1,2,3,4,5,6] and n_qubits is 3, this returns [[1,2,3],[2,3,4],[3,4,5],[4,5,6]]</span>
+    <span class="n">grouped_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n_qubits</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n_qubits</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">grouped_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n_qubits</span><span class="p">]))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">grouped_data</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">random</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+    <span class="n">shuffled_grouped_data</span> <span class="o">=</span> <span class="n">grouped_data</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+
+    <span class="n">train</span> <span class="o">=</span> <span class="n">shuffled_grouped_data</span><span class="p">[:</span> <span class="nb">int</span><span class="p">(</span><span class="n">train_ratio</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shuffled_grouped_data</span><span class="p">)))]</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="n">shuffled_grouped_data</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">train_ratio</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shuffled_grouped_data</span><span class="p">)))</span> <span class="p">:]</span>
+    <span class="n">train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">train_size</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">train_ratio</span><span class="p">,</span> <span class="n">indices</span></div>
+
+
+
+<div class="viewcode-block" id="scale_data">
+<a class="viewcode-back" href="../TrainingFuncs.html#TrainingFuncs.scale_data">[docs]</a>
+<span class="k">def</span> <span class="nf">scale_data</span><span class="p">(</span>
+    <span class="n">train</span><span class="p">,</span>
+    <span class="n">test</span><span class="p">,</span>
+    <span class="n">train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">n_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">scaler_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">scaler_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scales the data for embedding in the circuit. By default, scales all values to be between 0.2 and 0.8.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                    train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size, n_qubits)</span>
+<span class="sd">                    test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size, n_qubits)</span>
+<span class="sd">                    train_size (int): the length of the training set</span>
+<span class="sd">                    test_size (int): the length of the training set</span>
+<span class="sd">                    n_qubits (int): number of qubits in the circuit</span>
+<span class="sd">                    scaler_min (float)= the target minimum value for all values in the full dataset</span>
+<span class="sd">                    scaler_max (float)= the target maximum value for all values in the full dataset</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                    final_train (numpy.ndarray): 2-D array containing the scaled training data. The shape of the data is (train_size, n_qubits)</span>
+<span class="sd">                    final_test (numpy.ndarray): 2-D array containing the scaled testing data. The shape of the data is (test_size, n_qubits)</span>
+<span class="sd">                    scaler: The initialized and fitted scaler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">init_scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">((</span><span class="n">scaler_min</span><span class="p">,</span> <span class="n">scaler_max</span><span class="p">))</span>
+    <span class="n">train_1d</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">train_size</span> <span class="o">*</span> <span class="n">n_qubits</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">test_1d</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">test_size</span> <span class="o">*</span> <span class="n">n_qubits</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">train_test_1d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">train_1d</span><span class="p">,</span> <span class="n">test_1d</span><span class="p">))</span>
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">init_scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_test_1d</span><span class="p">)</span>
+    <span class="n">scaled_train_1d</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">train_1d</span><span class="p">)</span>
+    <span class="n">scaled_test_1d</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test_1d</span><span class="p">)</span>
+    <span class="n">scaled_train</span> <span class="o">=</span> <span class="n">scaled_train_1d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">train_size</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">)</span>
+    <span class="n">scaled_test</span> <span class="o">=</span> <span class="n">scaled_test_1d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="n">n_qubits</span><span class="p">)</span>
+
+    <span class="n">final_train</span> <span class="o">=</span> <span class="n">scaled_train</span>
+    <span class="n">final_test</span> <span class="o">=</span> <span class="n">scaled_test</span>
+
+    <span class="k">return</span> <span class="n">final_train</span><span class="p">,</span> <span class="n">final_test</span><span class="p">,</span> <span class="n">scaler</span></div>
+
+
+
+<div class="viewcode-block" id="train_model">
+<a class="viewcode-back" href="../TrainingFuncs.html#TrainingFuncs.train_model">[docs]</a>
+<span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span>
+    <span class="n">train</span><span class="p">,</span>
+    <span class="n">test</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">,</span>
+    <span class="n">circuit</span><span class="p">,</span>
+    <span class="n">n_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">loss_function</span><span class="o">=</span><span class="s2">&quot;mean square error&quot;</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">bool_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">save_plot</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains the circuit using the &quot;train&quot; dataset and according to the specified hyperparameters.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                    train (numpy.ndarray): 2-D array containing the scaled training data. Used to train the model and update weights.</span>
+<span class="sd">                    test (numpy.ndarray): 2-D array containing the scaled testing data. Used to check progress of training.</span>
+<span class="sd">                    weights: parameters of the circuit updated by the optimizer to change output.</span>
+<span class="sd">                    circuit (pennylane.qnode.QNode): The circuit which encodes the training data and, according to its parameters, returns an output to be compared with &quot;target&quot; data</span>
+<span class="sd">                    n_qubits (int): The number of qubits in the quantum circuit</span>
+<span class="sd">                    max_steps (int): The number of times the weights should be updated before the entire dataset has been evaluated.</span>
+<span class="sd">                    max_epochs (int): The maximum number of times the full dataset should be evaluated.</span>
+<span class="sd">                    loss_function: the function to evaluate the performance of the model i.e., the function to be minimized</span>
+<span class="sd">                    optimizer: The algorithm that adjusts the weights in the circuit.</span>
+<span class="sd">                    learning_rate: the learning rate of the optimizer.</span>
+<span class="sd">                    bool_plot (bool): If True, will plot the loss as a function of epochs once training is completed</span>
+<span class="sd">                    save_plot (str): If None, the plot will not be saved, otherwise it will be saved as the string entered</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                    weights: the most-recently updated weights that were obtained when training is complete</span>
+<span class="sd">                    x_t: input values for testing</span>
+<span class="sd">                    target_y_t: target values for training</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">input_target_split</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For a 2-D array, moves along axis = 0 and splits each array of size N into an &quot;input&quot; array of size N-1 and a &quot;target&quot; array of size N.</span>
+
+<span class="sd">                Parameters:</span>
+<span class="sd">                        data (numpy.ndarray): The 2-D array to be split</span>
+<span class="sd">                Returns:</span>
+<span class="sd">                        x (numpy.ndarray): A 2-D &quot;input&quot; array. x[i] is a 1-D array containing data[i][:-1]</span>
+<span class="sd">                        target_y (numpy.ndarray): A 2-D &quot;target&quot; array. target_y[i]  is a 1-D array of containing data[i][-1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data_size</span><span class="p">,</span> <span class="n">n_qubits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">target_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_size</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">target_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">target_y</span>
+
+    <span class="n">valid_loss_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mean square error&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">loss_function</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_loss_functions</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid loss function! Only currently supported loss function is &#39;mean square error&#39;&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">loss_function</span> <span class="o">==</span> <span class="s2">&quot;mean square error&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">square_loss</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculate the mean squared error (MSE) between target values and predicted values.</span>
+
+<span class="sd">                    Parameters:</span>
+<span class="sd">                            targets: The true target values.</span>
+<span class="sd">                            predictions: The predicted values.</span>
+
+<span class="sd">                    Returns:</span>
+<span class="sd">                            DynamicJaxprTracer: The calculated mean squared error between targets and predictions.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">reshaped_predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">targets</span> <span class="o">-</span> <span class="n">reshaped_predictions</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">not_jit_cost</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculate the cost function by evaluating the mean squared error between predicted values and target values.</span>
+
+<span class="sd">            This function calculates predictions using the vmapped function &#39;circuit&#39; and computes</span>
+<span class="sd">            the mean squared error between the predictions and true target values.</span>
+
+<span class="sd">                    Parameters:</span>
+<span class="sd">                            weights: Quantum circuit parameters.</span>
+<span class="sd">                            x (Jax tensor): Input data for making predictions.</span>
+<span class="sd">                            y (Jax tensor): True target values.</span>
+
+<span class="sd">                    Returns:</span>
+<span class="sd">                            DynamicJaxprTracer: Mean squared error between predicted values and true target values.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">circuit</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">square_loss</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span>
+
+        <span class="c1"># Create a jitted version of the cost function for just-in-time compilation</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">not_jit_cost</span><span class="p">)</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">target_y</span> <span class="o">=</span> <span class="n">input_target_split</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">x_t</span><span class="p">,</span> <span class="n">target_y_t</span> <span class="o">=</span> <span class="n">input_target_split</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+    <span class="n">train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">train_size</span> <span class="o">//</span> <span class="n">max_steps</span>
+    <span class="n">cst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">target_y</span><span class="p">))</span>
+    <span class="n">cst_t</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cst_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">target_y_t</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
+            <span class="c1"># Select batch of data</span>
+            <span class="n">batch_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+            <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span>
+            <span class="n">y_batch</span> <span class="o">=</span> <span class="n">target_y</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span>
+            <span class="c1"># Convert arrays into Jax tensors for vmapped circuit</span>
+            <span class="n">jax_x_batch</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
+            <span class="n">jax_y_batch</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_batch</span><span class="p">)</span>
+            <span class="c1"># Update the weights by one optimizer step</span>
+            <span class="n">gradient</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">cost</span><span class="p">)(</span><span class="n">weights</span><span class="p">,</span> <span class="n">jax_x_batch</span><span class="p">,</span> <span class="n">jax_y_batch</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">gradient</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">cost</span><span class="p">(</span>
+            <span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">target_y</span>
+        <span class="p">)</span>  <span class="c1"># Calculating the cost using the whole train data</span>
+        <span class="n">c_t</span> <span class="o">=</span> <span class="n">cost</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">target_y_t</span><span class="p">)</span>
+        <span class="n">cst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">cst_t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_t</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bool_plot</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">save_plot</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cst</span><span class="p">)),</span> <span class="n">cst</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">cst_t</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Cost&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Step&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Loss&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figtext</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="s2">&quot;initial train cost&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cst</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;; final train cost:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_plot</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_plot</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_plot</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_plot</span> <span class="o">+</span> <span class="s2">&quot;loss&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bool_plot</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">target_y_t</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="save_results_params">
+<a class="viewcode-back" href="../TrainingFuncs.html#TrainingFuncs.save_results_params">[docs]</a>
+<span class="k">def</span> <span class="nf">save_results_params</span><span class="p">(</span><span class="n">results_and_params</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves a dictionary containing n_qubits, indices, scaler, weights, inputs, and targets to the specified path</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                    results_and_params (dict): A dictionary containing n_qubits, indices, scaler, weights, inputs, and targets</span>
+<span class="sd">                    path (str): path to which the dictionary will be saved as &quot;dict&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;dict&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results_and_params</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="import_circuit">
+<a class="viewcode-back" href="../TrainingFuncs.html#TrainingFuncs.import_circuit">[docs]</a>
+<span class="k">def</span> <span class="nf">import_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">circuit</span> <span class="o">==</span> <span class="s2">&quot;MPS&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">Circuits.MPS</span> <span class="kn">import</span> <span class="n">initialize_MPS_circuit</span>
+
+        <span class="k">return</span> <span class="n">initialize_MPS_circuit</span>
+    <span class="k">if</span> <span class="n">circuit</span> <span class="o">==</span> <span class="s2">&quot;Ising&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">Circuits.Ising</span> <span class="kn">import</span> <span class="n">initialize_Ising_circuit</span>
+
+        <span class="k">return</span> <span class="n">initialize_Ising_circuit</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid circuit. Only currently supported circuits are &#39;MPS&#39; and &#39;Ising&#39;: use one of these or add a circuit to the Circuits library.&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andrew Spiro.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -3,7 +3,11 @@
 import os
 import sys
 
-sys.path.insert(0, "C:\Code\CVQC\src\Functions")
+sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../src/"))
+sys.path.insert(0, os.path.abspath("../src/Functions/"))
+
+
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
@@ -21,7 +25,7 @@ release = '1.0.0'
 extensions = [
   'sphinx.ext.autodoc',
   'sphinx.ext.viewcode',
-  'sphinxcontrib.napoleon',
+  'sphinx.ext.napoleon',
 ]
 
 templates_path = ['_templates']

@@ -1,5 +1,6 @@
 import pennylane as qml
 from pennylane import numpy as np
+import sklearn
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import pyplot as plt
 from tqdm import tqdm

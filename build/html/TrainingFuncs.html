@@ -1,99 +1,201 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>TrainingFuncs module &#8212; TSP 1.0.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b3523f8e" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
-    <script src="_static/documentation_options.js?v=8d563738"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrainingFuncs module &mdash; TSP 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="index.html" class="icon icon-home">
+            TSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">TrainingFuncs module</a><ul>
+<li><a class="reference internal" href="#TrainingFuncs.import_circuit"><code class="docutils literal notranslate"><span class="pre">import_circuit()</span></code></a></li>
+<li><a class="reference internal" href="#TrainingFuncs.save_results_params"><code class="docutils literal notranslate"><span class="pre">save_results_params()</span></code></a></li>
+<li><a class="reference internal" href="#TrainingFuncs.scale_data"><code class="docutils literal notranslate"><span class="pre">scale_data()</span></code></a></li>
+<li><a class="reference internal" href="#TrainingFuncs.split_train_test"><code class="docutils literal notranslate"><span class="pre">split_train_test()</span></code></a></li>
+<li><a class="reference internal" href="#TrainingFuncs.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
 
-          <div class="body" role="main">
-            
-  <section id="trainingfuncs-module">
-<h1>TrainingFuncs module<a class="headerlink" href="#trainingfuncs-module" title="Link to this heading">¶</a></h1>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TrainingFuncs module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/TrainingFuncs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-TrainingFuncs">
+<span id="trainingfuncs-module"></span><h1>TrainingFuncs module<a class="headerlink" href="#module-TrainingFuncs" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="TrainingFuncs.import_circuit">
+<span class="sig-prename descclassname"><span class="pre">TrainingFuncs.</span></span><span class="sig-name descname"><span class="pre">import_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TrainingFuncs.html#import_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TrainingFuncs.import_circuit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TrainingFuncs.save_results_params">
+<span class="sig-prename descclassname"><span class="pre">TrainingFuncs.</span></span><span class="sig-name descname"><span class="pre">save_results_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_and_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TrainingFuncs.html#save_results_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TrainingFuncs.save_results_params" title="Link to this definition"></a></dt>
+<dd><p>Saves a dictionary containing n_qubits, indices, scaler, weights, inputs, and targets to the specified path</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>results_and_params (dict): A dictionary containing n_qubits, indices, scaler, weights, inputs, and targets
+path (str): path to which the dictionary will be saved as “dict”</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TrainingFuncs.scale_data">
+<span class="sig-prename descclassname"><span class="pre">TrainingFuncs.</span></span><span class="sig-name descname"><span class="pre">scale_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TrainingFuncs.html#scale_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TrainingFuncs.scale_data" title="Link to this definition"></a></dt>
+<dd><p>Scales the data for embedding in the circuit. By default, scales all values to be between 0.2 and 0.8.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size, n_qubits)
+test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size, n_qubits)
+train_size (int): the length of the training set
+test_size (int): the length of the training set
+n_qubits (int): number of qubits in the circuit
+scaler_min (float)= the target minimum value for all values in the full dataset
+scaler_max (float)= the target maximum value for all values in the full dataset</p>
+</dd>
+<dt>Returns:</dt><dd><p>final_train (numpy.ndarray): 2-D array containing the scaled training data. The shape of the data is (train_size, n_qubits)
+final_test (numpy.ndarray): 2-D array containing the scaled testing data. The shape of the data is (test_size, n_qubits)
+scaler: The initialized and fitted scaler</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TrainingFuncs.split_train_test">
+<span class="sig-prename descclassname"><span class="pre">TrainingFuncs.</span></span><span class="sig-name descname"><span class="pre">split_train_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.6666666666666666</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TrainingFuncs.html#split_train_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TrainingFuncs.split_train_test" title="Link to this definition"></a></dt>
+<dd><p>Splits data into two sub-datsets: one for training and one for testing.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>data (numpy.array): 1-D data to be split
+n_qubits (int): number of qubits in the circuit
+train_ratio (float): fraction of full data to be used for training. Must be less than 1.
+random (bool): if False (default), the data is split chronologically e.g., the first 2/3 of the data are used for training and the last 1/3 are used for testing. If True, the data is split randomly.
+seed (int): seed for np.random</p>
+</dd>
+<dt>Returns:</dt><dd><p>train (numpy.ndarray): 2-D array containing the training data. The shape of the data is (train_size//n_qubits, n_qubits)
+test (numpy.ndarray): 2-D array containing the testing data. The shape of the data is (test_size//n_qubits, n_qubits)
+train_size: the total number of values in train divided by n_qubits (i.e., the number of n_qubits-sized “groups” in train)
+test_size: the total number of values in test divided by n_qubits (i.e., the number of n_qubits-sized “groups” in test)
+train_ratio: fraction of full data to be used for training. Must be less than 1.
+indices: gives the index of each “group” in the original data. If random is False, indices is just the range of integers from 0 to the number of groups.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TrainingFuncs.train_model">
+<span class="sig-prename descclassname"><span class="pre">TrainingFuncs.</span></span><span class="sig-name descname"><span class="pre">train_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean</span> <span class="pre">square</span> <span class="pre">error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TrainingFuncs.html#train_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TrainingFuncs.train_model" title="Link to this definition"></a></dt>
+<dd><p>Trains the circuit using the “train” dataset and according to the specified hyperparameters.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>train (numpy.ndarray): 2-D array containing the scaled training data. Used to train the model and update weights.
+test (numpy.ndarray): 2-D array containing the scaled testing data. Used to check progress of training.
+weights: parameters of the circuit updated by the optimizer to change output.
+circuit (pennylane.qnode.QNode): The circuit which encodes the training data and, according to its parameters, returns an output to be compared with “target” data
+n_qubits (int): The number of qubits in the quantum circuit
+max_steps (int): The number of times the weights should be updated before the entire dataset has been evaluated.
+max_epochs (int): The maximum number of times the full dataset should be evaluated.
+loss_function: the function to evaluate the performance of the model i.e., the function to be minimized
+optimizer: The algorithm that adjusts the weights in the circuit.
+learning_rate: the learning rate of the optimizer.
+bool_plot (bool): If True, will plot the loss as a function of epochs once training is completed
+save_plot (str): If None, the plot will not be saved, otherwise it will be saved as the string entered</p>
+</dd>
+<dt>Returns:</dt><dd><p>weights: the most-recently updated weights that were obtained when training is complete
+x_t: input values for testing
+target_y_t: target values for training</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
 </section>
 
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andrew Spiro.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">TSP</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, Andrew Spiro.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="_sources/TrainingFuncs.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>

@@ -1,99 +1,180 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>DataPreprocessingFuncs module &#8212; TSP 1.0.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b3523f8e" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
-    <script src="_static/documentation_options.js?v=8d563738"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataPreprocessingFuncs module &mdash; TSP 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="index.html" class="icon icon-home">
+            TSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">DataPreprocessingFuncs module</a><ul>
+<li><a class="reference internal" href="#DataPreprocessingFuncs.build_signal"><code class="docutils literal notranslate"><span class="pre">build_signal()</span></code></a></li>
+<li><a class="reference internal" href="#DataPreprocessingFuncs.find_components"><code class="docutils literal notranslate"><span class="pre">find_components()</span></code></a></li>
+<li><a class="reference internal" href="#DataPreprocessingFuncs.gradient"><code class="docutils literal notranslate"><span class="pre">gradient()</span></code></a></li>
+<li><a class="reference internal" href="#DataPreprocessingFuncs.load_data"><code class="docutils literal notranslate"><span class="pre">load_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
 
-          <div class="body" role="main">
-            
-  <section id="datapreprocessingfuncs-module">
-<h1>DataPreprocessingFuncs module<a class="headerlink" href="#datapreprocessingfuncs-module" title="Link to this heading">¶</a></h1>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">DataPreprocessingFuncs module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/DataPreprocessingFuncs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-DataPreprocessingFuncs">
+<span id="datapreprocessingfuncs-module"></span><h1>DataPreprocessingFuncs module<a class="headerlink" href="#module-DataPreprocessingFuncs" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="DataPreprocessingFuncs.build_signal">
+<span class="sig-prename descclassname"><span class="pre">DataPreprocessingFuncs.</span></span><span class="sig-name descname"><span class="pre">build_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_noise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['Full</span> <span class="pre">Singal',</span> <span class="pre">'Day',</span> <span class="pre">'Percent</span> <span class="pre">of</span> <span class="pre">change']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataPreprocessingFuncs.html#build_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataPreprocessingFuncs.build_signal" title="Link to this definition"></a></dt>
+<dd><p>Constructs a signal from three components: sinusoidal signals, noise, and a long term trend. The sinusoidal signals are given as the parameters DC (a 1-D array of each signal’s frequency) and amp (a 1-D array of the corresponding amplitudes)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>DC (1-D numpy.array): An array containing the frequencies of the deterministic components.
+amp (1-D numpy.array): An array containing the amplitudes of the deterministic components.
+c_noise (0, 1, 2, 3, or 4): Noise coefficient to determine the strength off the noise signal: 0 gives no noise, 4 gives a noise signal for which the maximum signal to noise ratio is 1. The coefficients scale the noise linearly.
+trend_type (0,1, or 2): 0 -&gt; flat trend: the signal has no long term trend. 1 -&gt; linear trend: the signal has a linear long-term trend with gradient 5e-2. 2 -&gt; quadratic trend: the signal has a quadratic linear trend with gradient 10e-5.
+N (int)= length of the original signal.</p>
+</dd>
+<dt>Returns:</dt><dd><p>full_signal (1-D numpy.array) = The signal consisting of the deterministic (sinusoidal) components, additive noise, and a long term trend.
+r  (int) = The number of deterministic components. In essence, the length of DC or amp.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DataPreprocessingFuncs.find_components">
+<span class="sig-prename descclassname"><span class="pre">DataPreprocessingFuncs.</span></span><span class="sig-name descname"><span class="pre">find_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_PSD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataPreprocessingFuncs.html#find_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataPreprocessingFuncs.find_components" title="Link to this definition"></a></dt>
+<dd><p>Performs a discrete Fourier transform and calculates the modulus squared to estimate the signal’s power spectral density.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>signal (numpy.array): 1-D data for which the power spectral density is to be estimated.
+threshold (int): The minimum amplitude squared required for a component frequency to be added to the list of deterministic components.
+bool_plot (bool) = If True, will show the periodogram.
+save_components (str, optional) = The name of the file to which the deterministic components will be saved. If not specified, the deterministic components will not be saved.</p>
+</dd>
+<dt>Returns:</dt><dd><p>DC (numpy.array): 1-D array containing the frequencies of the component signals with amplitudes above the threshold (the deterministic components).
+amp (numpy.array): 1-D array containing the amplitudes of the deterministic components. (DC[i] and amp[i] give the frequency and amplitude respectively of a deterministic component signal.)
+N (int)= Length of the original signal.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DataPreprocessingFuncs.gradient">
+<span class="sig-prename descclassname"><span class="pre">DataPreprocessingFuncs.</span></span><span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataPreprocessingFuncs.html#gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataPreprocessingFuncs.gradient" title="Link to this definition"></a></dt>
+<dd><p>Calculates the percent of change of an input dataset.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>sub_data (numpy.array): A 1-D array of size N. The sequential data for which the gradient should be calculated.</p>
+</dd>
+<dt>Returns:</dt><dd><p>pc numpy.array): A 1-D array of size N. The gradient (percent of change) of the input data. The nth value is the rate of change from xn to xn+1.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DataPreprocessingFuncs.load_data">
+<span class="sig-prename descclassname"><span class="pre">DataPreprocessingFuncs.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usecols=&lt;built-in</span> <span class="pre">function</span> <span class="pre">all&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skiprows=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_size=&lt;built-in</span> <span class="pre">function</span> <span class="pre">all&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot=False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataPreprocessingFuncs.html#load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataPreprocessingFuncs.load_data" title="Link to this definition"></a></dt>
+<dd><p>Loads a specified subset of a csv file. Documentation source: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html">https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html</a></p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>dataset (str, path object or file-like object): Any valid string path is acceptable. The string could be a URL. Valid URL schemes include http, ftp, s3, gs, and file. For file URLs, a host is expected. A local file could be: <a class="reference external" href="file://localhost/path/to/table.csv">file://localhost/path/to/table.csv</a>. If you want to pass in a path object, pandas accepts any os.PathLike. By file-like object, we refer to objects with a read() method, such as a file handle (e.g. via builtin open function) or StringIO.
+usecols (list-like or callable, optional): Return a subset of the columns. If list-like, all elements must either be positional (i.e. integer indices into the document columns) or strings that correspond to column names provided either by the user in names or inferred from the document header row(s). If names are given, the document header row(s) are not taken into account. For example, a valid list-like usecols parameter would be [0, 1, 2] or [‘foo’, ‘bar’, ‘baz’]. Element order is ignored, so usecols=[0, 1] is the same as [1, 0]. To instantiate a DataFrame from data with element order preserved use pd.read_csv(data, usecols=[‘foo’, ‘bar’])[[‘foo’, ‘bar’]] for columns in [‘foo’, ‘bar’] order or pd.read_csv(data, usecols=[‘foo’, ‘bar’])[[‘bar’, ‘foo’]] for [‘bar’, ‘foo’] order. If callable, the callable function will be evaluated against the column names, returning names where the callable function evaluates to True. An example of a valid callable argument would be lambda x: x.upper() in [‘AAA’, ‘BBB’, ‘DDD’].
+skiprows (list-like, int or callable, optional): Line numbers to skip (0-indexed) or number of lines to skip (int) at the start of the file. If callable, the callable function will be evaluated against the row indices, returning True if the row should be skipped and False otherwise. An example of a valid callable argument would be lambda x: x in [0, 2].
+sample_size (int): Number of datapoints to include i.e., number of rows except headers.
+bool_plot (boolean): If True, will plot the data</p>
+</dd>
+<dt>Returns:</dt><dd><p>dataset (numpy.array): a 1-D array</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
 </section>
 
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andrew Spiro.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">TSP</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, Andrew Spiro.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="_sources/DataPreprocessingFuncs.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>
