@@ -1,7 +1,7 @@
 from Functions.DataPreprocessingFuncs import *
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
-print("HERE: " + STR(dir_path))
+print("HERE: " + str(dir_path))
 
 Data = "AAPLmax"
 sample_size = 200
