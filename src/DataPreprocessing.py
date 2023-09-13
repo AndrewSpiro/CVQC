@@ -1,4 +1,5 @@
 from Functions.DataPreprocessingFuncs import *
+import os
 
 Data = "AAPLmax"
 sample_size = 200
@@ -9,12 +10,14 @@ Trend = 0  # Trend with 0 corresponding to no trend, 1 corresponding to linear, 
 # path = "Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
 path = "C:\Code\CVQC\src\Results\AAPLmax\\200\\1\\"
 
-dataset = load_data(
-    # "Datasets/" + Data + ".csv", usecols=["Close"], sample_size=sample_size
-    r'C:/Code/CVQC/src/Datasets/AAPLmax.csv',  # Use forward slashes or double backslashes
-    usecols=["Close"],
-    sample_size=sample_size
-)
+dataset_path = os.path.abspath(os.path.join(
+    os.path.dirname(__file__),  # Get the current script's directory
+    '../Datasets/AAPLmax.csv'   # Relative path to the dataset
+))
+# "Datasets/" + Data + ".csv", usecols=["Close"], sample_size=sample_size
+
+dataset = load_data(dataset_path, usecols=["Close"], sample_size=sample_size)
+
 
 percent_of_change = gradient(dataset)
 
