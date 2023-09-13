@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
 from matplotlib import pyplot as plt
-from src.DataPreprocessing import full_signal
+from DataPreprocessing import full_signal
 import pickle
 import pennylane as qml
 from jax import numpy as jnp
