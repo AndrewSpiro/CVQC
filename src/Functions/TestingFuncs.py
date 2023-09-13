@@ -1,6 +1,11 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
 from matplotlib import pyplot as plt
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+import DataPreprocessing
 from DataPreprocessing import full_signal
 import pickle
 import pennylane as qml
