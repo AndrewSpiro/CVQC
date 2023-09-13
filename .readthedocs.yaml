@@ -20,6 +20,3 @@ python:
   install:
     - requirements: requirements.txt
     - path: .
-
-extra_files:
-  - Datasets
