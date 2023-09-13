@@ -7,14 +7,9 @@ threshold = 1
 Noise = 0  # Coefficient of noise. Possible values are integers from 0 to 5 inclusive
 Trend = 0  # Trend with 0 corresponding to no trend, 1 corresponding to linear, and 2 corresponding to quadratic
 
-# path = "Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
-path = "C:\Code\CVQC\src\Results\AAPLmax\\200\\1\\"
+path = "Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
 
-dataset_path = os.path.abspath(os.path.join(
-    os.path.dirname(__file__),  # Get the current script's directory
-    '../Datasets/AAPLmax.csv'   # Relative path to the dataset
-))
-# "Datasets/" + Data + ".csv", usecols=["Close"], sample_size=sample_size
+dataset_path = "Datasets/" + Data + ".csv"
 
 dataset = load_data(dataset_path, usecols=["Close"], sample_size=sample_size)
 
