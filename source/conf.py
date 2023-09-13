@@ -10,7 +10,6 @@ sys.path.insert(0, os.path.abspath("../src/Datasets/"))
 sys.path.insert(0, os.path.abspath("../src/Results/AAPLmax/200/1/"))
 
 
-
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 

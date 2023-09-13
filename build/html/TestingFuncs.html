@@ -42,16 +42,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <!-- Local TOC -->
               <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">TestingFuncs module</a><ul>
-<li><a class="reference internal" href="#TestingFuncs.calc_MSE"><code class="docutils literal notranslate"><span class="pre">calc_MSE()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.forward"><code class="docutils literal notranslate"><span class="pre">forward()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.inverse_transform"><code class="docutils literal notranslate"><span class="pre">inverse_transform()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.load_results_params"><code class="docutils literal notranslate"><span class="pre">load_results_params()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.make_predictions"><code class="docutils literal notranslate"><span class="pre">make_predictions()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
-<li><a class="reference internal" href="#TestingFuncs.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">TestingFuncs module</a></li>
 </ul>
 </div>
         </div>
@@ -78,124 +69,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-TestingFuncs">
-<span id="testingfuncs-module"></span><h1>TestingFuncs module<a class="headerlink" href="#module-TestingFuncs" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.calc_MSE">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">calc_MSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled_predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled_targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_scaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#calc_MSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.calc_MSE" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Calculates the mean squared error given predictions and target data. Also calculates the forward using the target data.</dt><dd><dl class="simple">
-<dt>Parameters:</dt><dd><p>scaled_inputs: Data scaled for encoding into the circuit. Default range is 0.2 to 0.8.
-scaled_predictions: Predictions from the PQC in the range of -1 to 1.
-scaled_targets: Data scaled using the same strategy as scaled_inputs: default range is 0.2 to 0.8.
-bool_scaled: If False, the MinMaxScaler method “inverse_transform” is used to return the data to their original values before evaluating the MSE.</p>
-</dd>
-<dt>Returns:</dt><dd><p>mse: the mean squared error calculated using the either the scaled or real-value predictions and targets, depending on whether bool_scaled is True
-forward_mse: the mse obtained from a model which predicts each value x_n as the value before it x_n-1.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.forward">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.forward" title="Link to this definition"></a></dt>
-<dd><p>A model which predicts each value x_n as the value before it x_n-1.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>inputs (numpy.array): Data used by the forward to make a prediction. Shape is (batch_size, n_qubits) where batch_size = train_size//max_steps.
-targets (numpy.array): True results against which the forward’s predictions are compared. Shape is (batch_size, 1).</p>
-</dd>
-<dt>Returns:</dt><dd><p>forward_mse: the mse obtained from the “forward” model.</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.inverse_transform">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.inverse_transform" title="Link to this definition"></a></dt>
-<dd><p>Performs and inverse transform on predictions and targets to return the data to their original values before scaling with MinMaxScaler</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>scaled_data: data scaled according to the MinMaxScaler.
-scaler: The MinMaxScaler initialized in training. To be loaded from a dictionary.</p>
-</dd>
-<dt>Returns:</dt><dd><p>data: original data before being scaled with MinMaxScaler</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.load_results_params">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">load_results_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#load_results_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.load_results_params" title="Link to this definition"></a></dt>
-<dd><p>Loads saved weights, input and target data for testing, scaler for “unscaling” to original data values, indices for unshuffling the testing data and predictions, and n_qubits.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>dict_path: Path of the dictionary containing the desired parameters.</p>
-</dd>
-<dt>Returns:</dt><dd><p>results_params: the dictionary containing the desired parameters.</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.make_predictions">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">make_predictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#make_predictions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.make_predictions" title="Link to this definition"></a></dt>
-<dd><p>Uses test data and weights obtained from training to make predictions.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>circuit (function): The vmapped circuit to make predictions.
-weights (Jax tensor): Array of weights obtained from training.
-inputs (numpy.array): test data. Shape is (batch_size, n_qubits) where batch_size = train_size//max_steps.</p>
-</dd>
-<dt>Returns:</dt><dd><p>predictions: An array of predicted values, each evaluated by a PQC using weights and some input data. Each value is an expectation value from the PQC and is therefore scale from -1 to 1.</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.plot">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_mse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['x-axis',</span> <span class="pre">'y-axis']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.plot" title="Link to this definition"></a></dt>
-<dd><p>Creates a plot of the original data, the targets and the predictions.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>predictions: An array of predicted values, each evaluated by a circuit using weights and some input data. Each value has been unscaled to be in the range of the original data.
-targets: The true valuues against which the predictions are compared.
-indices: gives the index of each prediction and target in the original data.
-n_qubits (int): number of qubits in the circuit
-bool_plot (bool): If True, a plot of the predicted values over the true values will be shown when the code is run as a cell.
-save_plot: If None, the plot will not be saved. Otherwise, the plot will be saved to the path given as the string.
-mse: The MSE from the circuit’s predictions. To be shown on the plot.
-forward_mse: The MSE from the forward’s predictions. To be shown on the plot.
-plot_labels: A list of two strings giving the plot’s axis labels. Should be of the form [‘x-axis’,’y-axis’].</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="TestingFuncs.test">
-<span class="sig-prename descclassname"><span class="pre">TestingFuncs.</span></span><span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled_targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_mse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_scaled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TestingFuncs.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#TestingFuncs.test" title="Link to this definition"></a></dt>
-<dd><p>Evaluates the performance of the circuit with final weights on the test dataset.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Parameters:</dt><dd><p>inputs: Test data
-weights: Weights obtained from training
-plot_labels: A list containing the x and y axis labels.
-bool_plot: If True, a plot of the predicted values over the true values will be shown when the code is run as a cell.
-save_plot: If None, the plot will not be saved. Otherwise, the plot will be saved to the path given as the string.
-save_mse (str): If None, the mse will not be saved, otherwise, the mse and forward mse will be saved in a directory called ‘MSE to the path given with keys ‘Circuit MSE’ and ‘Forward MSE’.
-bool_scaled: If True, the mse is calculated using the scaled values. If False, the mse is calculated using the original (unscaled) values.</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd></dl>
-
+  <section id="testingfuncs-module">
+<h1>TestingFuncs module<a class="headerlink" href="#testingfuncs-module" title="Link to this heading"></a></h1>
 </section>
 
 

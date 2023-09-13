@@ -13,7 +13,6 @@ dataset_path = "Datasets/" + Data + ".csv"
 
 dataset = load_data(dataset_path, usecols=["Close"], sample_size=sample_size)
 
-
 percent_of_change = gradient(dataset)
 
 # Provide load_PSD = path if there exists already a file with the power spectral density. Otherwise specify the parameters 'signal' and 'threshold' and provide parameter save_components = path.
