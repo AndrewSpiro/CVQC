@@ -7,9 +7,9 @@ threshold = 1
 Noise = 0  # Coefficient of noise. Possible values are integers from 0 to 5 inclusive
 Trend = 0  # Trend with 0 corresponding to no trend, 1 corresponding to linear, and 2 corresponding to quadratic
 
-path = "src/Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
+path = "CVQC/src/Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
 
-dataset_path = "src/Datasets/" + Data + ".csv"
+dataset_path = "CVQC/src/Datasets/" + Data + ".csv"
 
 dataset = load_data(dataset_path, usecols=["Close"], sample_size=sample_size)
 
