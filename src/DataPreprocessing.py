@@ -1,5 +1,7 @@
 from Functions.DataPreprocessingFuncs import *
 import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+print(dir_path)
 
 Data = "AAPLmax"
 sample_size = 200
@@ -7,9 +9,9 @@ threshold = 1
 Noise = 0  # Coefficient of noise. Possible values are integers from 0 to 5 inclusive
 Trend = 0  # Trend with 0 corresponding to no trend, 1 corresponding to linear, and 2 corresponding to quadratic
 
-path = "C;/Code/CVQC/src/Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
+path = "CVQC/src/Results/" + Data + "/" + str(sample_size) + "/" + str(threshold) + "/"
 
-dataset_path = "C:/Code/CVQC/src/Datasets/" + Data + ".csv"
+dataset_path = "CVQC/src/Datasets/" + Data + ".csv"
 
 dataset = load_data(dataset_path, usecols=["Close"], sample_size=sample_size)
 
