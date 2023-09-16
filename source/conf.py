@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath("../src/Functions/"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'QML Benchmark'
+project = 'PQC Benchmark'
 copyright = '2023, Andrew Spiro'
 author = 'Andrew Spiro'
 release = '1.0.0'
