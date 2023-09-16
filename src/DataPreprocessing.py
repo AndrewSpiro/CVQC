@@ -3,7 +3,7 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 print("HERE: " + str(dir_path))
 
-Data = "AAPLmax"
+Data = "AAPLmax" # File name without extension
 sample_size = 200
 threshold = 1
 Noise = 0  # Coefficient of noise. Possible values are integers from 0 to 5 inclusive
